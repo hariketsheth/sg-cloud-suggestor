@@ -33,8 +33,11 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 interface FormData {
-  baseline: unknown;
-  peak: unknown;
+  operatingSystem: string;
+  cloudProviders: any;
+  criticality: any;
+  baseline: number;
+  peak: number;
   spikeDays: any;
   workloadSpike: string;
   workflowType: string;
@@ -44,7 +47,6 @@ interface FormData {
   storagePerformance: string;
   latencySensitivity: string;
   preferredRegion: string;
-  geographicLatency: string;
   complianceRequirement: string;
   dataResidency: string;
   maxBudget: string;
@@ -53,6 +55,7 @@ interface FormData {
   csrPriority: number;
   performancePriority: number;
   securityPriority: number;
+  numberOfHits: number;
 }
 
 interface Compute {
@@ -84,19 +87,22 @@ export function ProcessView() {
         storagePerformance: '',
         latencySensitivity: '',
         preferredRegion: '',
-        geographicLatency: '',
         complianceRequirement: '',
         dataResidency: '',
         maxBudget: '',
         pricingModel: '',
+        criticality: '',
         costPriority: 25,
         csrPriority: 25,
         performancePriority: 25,
         securityPriority: 25,
         workloadSpike: '',
-        baseline: '',
-        peak: '',
+        baseline: 0,
+        peak: 0,
         spikeDays: [],
+        numberOfHits: 0,
+        cloudProviders: ['Azure', 'AWS', 'On-Premises'],
+        operatingSystem: '',
       },
     },
   ]);
@@ -172,20 +178,11 @@ export function ProcessView() {
   };
 
   const handleSpikeChange = (workloadId: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
+    const { name, value } = e.target;
     setWorkloads((prevWorkloads) =>
       prevWorkloads.map((workload) =>
         workload.id === workloadId
-          ? {
-              ...workload,
-              formData: {
-                ...workload.formData,
-                workloadSpike: value,
-                baseline: '',
-                peak: '',
-                spikeDays: [],
-              },
-            }
+          ? { ...workload, formData: { ...workload.formData, [name]: value } }
           : workload
       )
     );
@@ -214,6 +211,7 @@ export function ProcessView() {
       id: workloadCount + 1,
       name: `Workload ${workloadCount + 1}`,
       formData: {
+        operatingSystem: '',
         workflowType: '',
         computes: [{ id: 1, name: 'Compute 1', vCPU: '', memory: '' }],
         storageType: '',
@@ -221,6 +219,7 @@ export function ProcessView() {
         storagePerformance: '',
         latencySensitivity: '',
         preferredRegion: '',
+        criticality: '',
         geographicLatency: '',
         complianceRequirement: '',
         dataResidency: '',
@@ -231,15 +230,33 @@ export function ProcessView() {
         performancePriority: 25,
         securityPriority: 25,
         workloadSpike: '',
-        baseline: '',
-        peak: '',
+        baseline: 0,
+        peak: 0,
         spikeDays: [],
+        numberOfHits: 0,
+        cloudProviders: ['Azure', 'AWS', 'On-Premises'],
       },
     };
     setWorkloads([...workloads, newWorkload]);
     setWorkloadCount(workloadCount + 1);
   };
-
+  const handleCloudProviderChange = (workloadId: number, provider: string) => {
+    setWorkloads((prevWorkloads) =>
+      prevWorkloads.map((workload) =>
+        workload.id === workloadId
+          ? {
+              ...workload,
+              formData: {
+                ...workload.formData,
+                cloudProviders: workload.formData.cloudProviders.includes(provider)
+                  ? workload.formData.cloudProviders.filter((p: any) => p !== provider)
+                  : [...workload.formData.cloudProviders, provider],
+              },
+            }
+          : workload
+      )
+    );
+  };
   const handleNext = () => {
     setCurrentStage((prev) => prev + 1);
   };
@@ -283,6 +300,28 @@ export function ProcessView() {
                     <MenuItem value="Others">Others</MenuItem>
                   </Select>
                 </FormControl>
+
+                {(workload.formData.workflowType === 'Machine Learning' ||
+                  workload.formData.workflowType === 'Web Application') && (
+                  <FormControl fullWidth sx={{ mb: 3 }}>
+                    <Select
+                      name="operatingSystem"
+                      value={workload.formData.operatingSystem}
+                      onChange={(e) => handleSelectChange(workload.id, e)}
+                      displayEmpty
+                    >
+                      <MenuItem value="" disabled>
+                        Select Operating System
+                      </MenuItem>
+                      <MenuItem value="Windows">Windows</MenuItem>
+                      <MenuItem value="Linux">Linux</MenuItem>
+                      <MenuItem value="Unix">Unix</MenuItem>
+                      <MenuItem value="RedHat (RHEL)">RedHat (RHEL)</MenuItem>
+                      <MenuItem value="Others">Others</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
+
                 <Typography variant="h6">Compute</Typography>
                 <TextField
                   fullWidth
@@ -304,15 +343,20 @@ export function ProcessView() {
                 />
 
                 <Typography variant="h6">Storage</Typography>
-                <TextField
-                  fullWidth
-                  name="storageType"
-                  label="Type"
-                  type="number"
-                  value={workload.formData.storageType}
-                  onChange={(e) => handleChange(workload.id, e)}
-                  sx={{ mb: 3 }}
-                />
+                <FormControl fullWidth sx={{ mb: 3 }}>
+                  <Select
+                    name="storageType"
+                    value={workload.formData.storageType}
+                    onChange={(e) => handleSelectChange(workload.id, e)}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Storage Type
+                    </MenuItem>
+                    <MenuItem value="Relational">Relational</MenuItem>
+                    <MenuItem value="Non-relational">Non-relational</MenuItem>
+                  </Select>
+                </FormControl>
                 <TextField
                   fullWidth
                   name="storageSize"
@@ -364,64 +408,72 @@ export function ProcessView() {
                     </ToggleButton>
                   </ToggleButtonGroup>
                 </FormControl>
-                <br/>
+                <br />
                 <FormControl component="fieldset" sx={{ mb: 3 }}>
-  <FormLabel component="legend">Workload Spike</FormLabel>
-  <RadioGroup
-    name="workloadSpike"
-    value={workload.formData.workloadSpike}
-    onChange={(e) => handleSpikeChange(workload.id, e)}
-  >
-    <FormControlLabel value="Constant" control={<Radio />} label="Constant" />
-    <FormControlLabel value="Daily" control={<Radio />} label="Daily" />
-    <FormControlLabel value="Weekly" control={<Radio />} label="Weekly" />
-    <FormControlLabel value="Monthly" control={<Radio />} label="Monthly" />
-  </RadioGroup>
-</FormControl>
+                  <FormLabel component="legend">Workload Spike</FormLabel>
+                  <RadioGroup
+                    name="workloadSpike"
+                    value={workload.formData.workloadSpike}
+                    onChange={(e) => handleSpikeChange(workload.id, e)}
+                  >
+                    <FormControlLabel value="Constant" control={<Radio />} label="Constant" />
+                    <FormControlLabel value="Daily" control={<Radio />} label="Daily" />
+                    <FormControlLabel value="Weekly" control={<Radio />} label="Weekly" />
+                    <FormControlLabel value="Monthly" control={<Radio />} label="Monthly" />
+                  </RadioGroup>
+                </FormControl>
 
-{workload.formData.workloadSpike && (
-  <>
-    <TextField
-      fullWidth
-      name="baseline"
-      label="Baseline (Minimum instances required)"
-      type="number"
-      value={workload.formData.baseline}
-      onChange={(e) => handleChange(workload.id, e)}
-      sx={{ mb: 3 }}
-    />
+                {workload.formData.workloadSpike && (
+                  <>
+                    <TextField
+                      fullWidth
+                      name="baseline"
+                      label="Baseline (Minimum instances required)"
+                      type="number"
+                      value={workload.formData.baseline}
+                      onChange={(e) => handleChange(workload.id, e)}
+                      sx={{ mb: 3 }}
+                    />
 
-    <TextField
-      fullWidth
-      name="peak"
-      label="Peak (Maximum instances required during spike)"
-      type="number"
-      value={workload.formData.peak}
-      onChange={(e) => handleChange(workload.id, e)}
-      sx={{ mb: 3 }}
-    />
-  </>
-)}
+                    <TextField
+                      fullWidth
+                      name="peak"
+                      label="Peak (Maximum instances required during spike)"
+                      type="number"
+                      value={workload.formData.peak}
+                      onChange={(e) => handleChange(workload.id, e)}
+                      sx={{ mb: 3 }}
+                    />
+                  </>
+                )}
 
-{workload.formData.workloadSpike === 'Daily' && (
-  <FormControl component="fieldset" sx={{ mb: 3 }}>
-    <FormLabel component="legend">Spike Days</FormLabel>
-    <Box>
-      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-        <FormControlLabel
-          key={day}
-          control={
-            <Checkbox
-              checked={workload.formData.spikeDays.includes(day)}
-              onChange={() => handleSpikeDaysChange(workload.id, day)}
-            />
-          }
-          label={day}
-        />
-      ))}
-    </Box>
-  </FormControl>
-)}
+                {workload.formData.workloadSpike === 'Daily' && (
+                  <FormControl component="fieldset" sx={{ mb: 3 }}>
+                    <FormLabel component="legend">Spike Days</FormLabel>
+                    <Box>
+                      {[
+                        'Monday',
+                        'Tuesday',
+                        'Wednesday',
+                        'Thursday',
+                        'Friday',
+                        'Saturday',
+                        'Sunday',
+                      ].map((day) => (
+                        <FormControlLabel
+                          key={day}
+                          control={
+                            <Checkbox
+                              checked={workload.formData.spikeDays.includes(day)}
+                              onChange={() => handleSpikeDaysChange(workload.id, day)}
+                            />
+                          }
+                          label={day}
+                        />
+                      ))}
+                    </Box>
+                  </FormControl>
+                )}
               </AccordionDetails>
             </Accordion>
           ))}
@@ -429,7 +481,38 @@ export function ProcessView() {
       ),
     },
     {
-      name: 'Geographic Requirements',
+      name: 'Cost Preferences',
+      content: (
+        <>
+          <TextField
+            fullWidth
+            name="maxBudget"
+            label="Maximum Budget"
+            type="number"
+            value={workloads[0].formData.maxBudget}
+            onChange={(e) => handleChange(workloads[0].id, e)}
+            sx={{ mb: 3 }}
+          />
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <Select
+              name="pricingModel"
+              value={workloads[0].formData.pricingModel}
+              onChange={(e) => handleSelectChange(workloads[0].id, e)}
+              displayEmpty
+            >
+              <MenuItem value="" disabled>
+                Select Pricing Model
+              </MenuItem>
+              <MenuItem value="on-demand">On-demand</MenuItem>
+              <MenuItem value="spot">Spot</MenuItem>
+              <MenuItem value="reserved">Reserved</MenuItem>
+            </Select>
+          </FormControl>
+        </>
+      ),
+    },
+    {
+      name: 'Business Preferences',
       content: (
         <>
           <FormControl fullWidth sx={{ mb: 3 }}>
@@ -449,13 +532,11 @@ export function ProcessView() {
             </Select>
           </FormControl>
           <FormControl component="fieldset" sx={{ mb: 3 }}>
-            <FormLabel component="legend">Latency</FormLabel>
+            <FormLabel component="legend">Criticality</FormLabel>
             <ToggleButtonGroup
-              value={workloads[0].formData.geographicLatency}
+              value={workloads[0].formData.criticality}
               exclusive
-              onChange={(e, value) =>
-                handleToggleChange(workloads[0].id, 'geographicLatency')(e, value)
-              }
+              onChange={(e, value) => handleToggleChange(workloads[0].id, 'criticality')(e, value)}
               aria-label="geographic latency"
             >
               <ToggleButton
@@ -512,61 +593,51 @@ export function ProcessView() {
               <MenuItem value="south-america">South America</MenuItem>
             </Select>
           </FormControl>
-        </>
-      ),
-    },
-    {
-      name: 'Cost Preferences',
-      content: (
-        <>
           <TextField
             fullWidth
-            name="maxBudget"
-            label="Maximum Budget"
+            name="numberOfHits"
+            label="Number of hits/day"
             type="number"
-            value={workloads[0].formData.maxBudget}
+            inputProps={{ min: 0 }}
+            value={workloads[0].formData.numberOfHits}
             onChange={(e) => handleChange(workloads[0].id, e)}
             sx={{ mb: 3 }}
           />
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <Select
-              name="pricingModel"
-              value={workloads[0].formData.pricingModel}
-              onChange={(e) => handleSelectChange(workloads[0].id, e)}
-              displayEmpty
-            >
-              <MenuItem value="" disabled>
-                Select Pricing Model
-              </MenuItem>
-              <MenuItem value="on-demand">On-demand</MenuItem>
-              <MenuItem value="spot">Spot</MenuItem>
-              <MenuItem value="reserved">Reserved</MenuItem>
-            </Select>
+          <FormControl component="fieldset" sx={{ mb: 3 }}>
+            <FormLabel component="legend">Cloud Provider</FormLabel>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={workloads[0].formData.cloudProviders.includes('Azure')}
+                  onChange={() => handleCloudProviderChange(workloads[0].id, 'Azure')}
+                />
+              }
+              label="Azure"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={workloads[0].formData.cloudProviders.includes('AWS')}
+                  onChange={() => handleCloudProviderChange(workloads[0].id, 'AWS')}
+                />
+              }
+              label="AWS"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={workloads[0].formData.cloudProviders.includes('On-Premises')}
+                  onChange={() => handleCloudProviderChange(workloads[0].id, 'On-Premises')}
+                />
+              }
+              label="On-Premises"
+            />
           </FormControl>
-        </>
-      ),
-    },
-    {
-      name: 'Business Priorities',
-      content: (
-        <>
           <Typography variant="h6">Cost Priority</Typography>
           <Slider
             value={workloads[0].formData.costPriority}
             onChange={(e, value) => handleSliderChange(workloads[0].id, 'costPriority')(e, value)}
             aria-labelledby="cost-priority-slider"
-            valueLabelDisplay="auto"
-            step={1}
-            marks
-            min={0}
-            max={100}
-            sx={{ mb: 3 }}
-          />
-          <Typography variant="h6">CSR Priority</Typography>
-          <Slider
-            value={workloads[0].formData.csrPriority}
-            onChange={(e, value) => handleSliderChange(workloads[0].id, 'csrPriority')(e, value)}
-            aria-labelledby="csr-priority-slider"
             valueLabelDisplay="auto"
             step={1}
             marks
@@ -581,20 +652,6 @@ export function ProcessView() {
               handleSliderChange(workloads[0].id, 'performancePriority')(e, value)
             }
             aria-labelledby="performance-priority-slider"
-            valueLabelDisplay="auto"
-            step={1}
-            marks
-            min={0}
-            max={100}
-            sx={{ mb: 3 }}
-          />
-          <Typography variant="h6">Security Priority</Typography>
-          <Slider
-            value={workloads[0].formData.securityPriority}
-            onChange={(e, value) =>
-              handleSliderChange(workloads[0].id, 'securityPriority')(e, value)
-            }
-            aria-labelledby="security-priority-slider"
             valueLabelDisplay="auto"
             step={1}
             marks
