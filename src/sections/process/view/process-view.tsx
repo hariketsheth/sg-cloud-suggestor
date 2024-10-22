@@ -603,62 +603,80 @@ export function ProcessView() {
             onChange={(e) => handleChange(workloads[0].id, e)}
             sx={{ mb: 3 }}
           />
-          <FormControl component="fieldset" sx={{ mb: 3 }}>
-            <FormLabel component="legend">Cloud Provider</FormLabel>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={workloads[0].formData.cloudProviders.includes('Azure')}
-                  onChange={() => handleCloudProviderChange(workloads[0].id, 'Azure')}
-                />
-              }
-              label="Azure"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={workloads[0].formData.cloudProviders.includes('AWS')}
-                  onChange={() => handleCloudProviderChange(workloads[0].id, 'AWS')}
-                />
-              }
-              label="AWS"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={workloads[0].formData.cloudProviders.includes('On-Premises')}
-                  onChange={() => handleCloudProviderChange(workloads[0].id, 'On-Premises')}
-                />
-              }
-              label="On-Premises"
-            />
-          </FormControl>
-          <Typography variant="h6">Cost Priority</Typography>
-          <Slider
-            value={workloads[0].formData.costPriority}
-            onChange={(e, value) => handleSliderChange(workloads[0].id, 'costPriority')(e, value)}
-            aria-labelledby="cost-priority-slider"
-            valueLabelDisplay="auto"
-            step={1}
-            marks
-            min={0}
-            max={100}
-            sx={{ mb: 3 }}
+<Grid container spacing={3}>
+  <Grid item xs={12}>
+  <FormControl component="fieldset" sx={{ mb: 3 }}>
+  <FormLabel component="legend">Cloud Provider</FormLabel>
+  <Grid container spacing={2}>
+    <Grid item>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={workloads[0].formData.cloudProviders.includes('Azure')}
+            onChange={() => handleCloudProviderChange(workloads[0].id, 'Azure')}
           />
-          <Typography variant="h6">Performance Priority</Typography>
-          <Slider
-            value={workloads[0].formData.performancePriority}
-            onChange={(e, value) =>
-              handleSliderChange(workloads[0].id, 'performancePriority')(e, value)
-            }
-            aria-labelledby="performance-priority-slider"
-            valueLabelDisplay="auto"
-            step={1}
-            marks
-            min={0}
-            max={100}
-            sx={{ mb: 3 }}
+        }
+        label="Azure"
+      />
+    </Grid>
+    <Grid item>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={workloads[0].formData.cloudProviders.includes('AWS')}
+            onChange={() => handleCloudProviderChange(workloads[0].id, 'AWS')}
           />
+        }
+        label="AWS"
+      />
+    </Grid>
+    <Grid item>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={workloads[0].formData.cloudProviders.includes('On-Premises')}
+            onChange={() => handleCloudProviderChange(workloads[0].id, 'On-Premises')}
+          />
+        }
+        label="On-Premises"
+      />
+    </Grid>
+  </Grid>
+</FormControl>
+  </Grid>
+
+  <Grid item xs={12}>
+    <Box mt={2}>
+      <Typography variant="h5" gutterBottom>
+        Priorities
+      </Typography>
+      <Typography variant="h6">Cost Priority</Typography>
+      <Slider
+        value={workloads[0].formData.costPriority}
+        onChange={(e, value) => handleSliderChange(workloads[0].id, 'costPriority')(e, value)}
+        aria-labelledby="cost-priority-slider"
+        valueLabelDisplay="auto"
+        step={1}
+        marks
+        min={0}
+        max={100}
+        sx={{ mb: 3 }}
+      />
+      <Typography variant="h6">Performance Priority</Typography>
+      <Slider
+        value={workloads[0].formData.performancePriority}
+        onChange={(e, value) => handleSliderChange(workloads[0].id, 'performancePriority')(e, value)}
+        aria-labelledby="performance-priority-slider"
+        valueLabelDisplay="auto"
+        step={1}
+        marks
+        min={0}
+        max={100}
+        sx={{ mb: 3 }}
+      />
+    </Box>
+  </Grid>
+</Grid>
         </>
       ),
     },
