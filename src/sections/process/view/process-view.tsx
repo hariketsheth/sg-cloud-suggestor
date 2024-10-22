@@ -19,13 +19,24 @@ import {
   ToggleButtonGroup,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  InputLabel,
+  Checkbox,
+  ListItemText,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useRouter } from 'src/routes/hooks';
 import { DashboardContent } from 'src/layouts/dashboard';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 interface FormData {
+  baseline: unknown;
+  peak: unknown;
+  spikeDays: any;
+  workloadSpike: string;
   workflowType: string;
   computes: Compute[];
   storageType: string;
@@ -81,12 +92,18 @@ export function ProcessView() {
         costPriority: 25,
         csrPriority: 25,
         performancePriority: 25,
-        securityPriority: 25
-      }
-    }
+        securityPriority: 25,
+        workloadSpike: '',
+        baseline: '',
+        peak: '',
+        spikeDays: [],
+      },
+    },
   ]);
-
-  const handleChange = (workloadId: number, e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (
+    workloadId: number,
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
+  ) => {
     const { name, value } = e.target as HTMLInputElement;
     setWorkloads((prevWorkloads) =>
       prevWorkloads.map((workload) =>
@@ -108,29 +125,32 @@ export function ProcessView() {
     );
   };
 
-  const handleSliderChange = (workloadId: number, name: keyof FormData) => (event: Event, value: number | number[]) => {
-    setWorkloads((prevWorkloads) =>
-      prevWorkloads.map((workload) =>
-        workload.id === workloadId
-          ? { ...workload, formData: { ...workload.formData, [name]: value as number } }
-          : workload
-      )
-    );
-  };
-
-  const handleToggleChange = (workloadId: number, name: keyof FormData) => (event: React.MouseEvent<HTMLElement>, value: string) => {
-    if (value !== null) {
+  const handleSliderChange =
+    (workloadId: number, name: keyof FormData) => (event: Event, value: number | number[]) => {
       setWorkloads((prevWorkloads) =>
         prevWorkloads.map((workload) =>
           workload.id === workloadId
-            ? { ...workload, formData: { ...workload.formData, [name]: value } }
+            ? { ...workload, formData: { ...workload.formData, [name]: value as number } }
             : workload
         )
       );
-    }
-  };
+    };
 
-  const handleComputeChange = (workloadId: number, computeId: number, field: keyof Compute, value: string) => {
+  const handleToggleChange =
+    (workloadId: number, name: keyof FormData) =>
+    (event: React.MouseEvent<HTMLElement>, value: string) => {
+      if (value !== null) {
+        setWorkloads((prevWorkloads) =>
+          prevWorkloads.map((workload) =>
+            workload.id === workloadId
+              ? { ...workload, formData: { ...workload.formData, [name]: value } }
+              : workload
+          )
+        );
+      }
+    };
+
+  const handleComputeChange = (workloadId: number, field: keyof Compute, value: string) => {
     setWorkloads((prevWorkloads) =>
       prevWorkloads.map((workload) =>
         workload.id === workloadId
@@ -138,10 +158,51 @@ export function ProcessView() {
               ...workload,
               formData: {
                 ...workload.formData,
-                computes: workload.formData.computes.map((compute) =>
-                  compute.id === computeId ? { ...compute, [field]: value } : compute
-                )
-              }
+                computes: [
+                  {
+                    ...workload.formData.computes[0],
+                    [field]: value,
+                  },
+                ],
+              },
+            }
+          : workload
+      )
+    );
+  };
+
+  const handleSpikeChange = (workloadId: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setWorkloads((prevWorkloads) =>
+      prevWorkloads.map((workload) =>
+        workload.id === workloadId
+          ? {
+              ...workload,
+              formData: {
+                ...workload.formData,
+                workloadSpike: value,
+                baseline: '',
+                peak: '',
+                spikeDays: [],
+              },
+            }
+          : workload
+      )
+    );
+  };
+
+  const handleSpikeDaysChange = (workloadId: number, day: string) => {
+    setWorkloads((prevWorkloads) =>
+      prevWorkloads.map((workload) =>
+        workload.id === workloadId
+          ? {
+              ...workload,
+              formData: {
+                ...workload.formData,
+                spikeDays: workload.formData.spikeDays.includes(day)
+                  ? workload.formData.spikeDays.filter((d: any) => d !== day)
+                  : [...workload.formData.spikeDays, day],
+              },
             }
           : workload
       )
@@ -168,8 +229,12 @@ export function ProcessView() {
         costPriority: 25,
         csrPriority: 25,
         performancePriority: 25,
-        securityPriority: 25
-      }
+        securityPriority: 25,
+        workloadSpike: '',
+        baseline: '',
+        peak: '',
+        spikeDays: [],
+      },
     };
     setWorkloads([...workloads, newWorkload]);
     setWorkloadCount(workloadCount + 1);
@@ -198,7 +263,7 @@ export function ProcessView() {
         <>
           {workloads.map((workload) => (
             <Accordion key={workload.id} sx={{ mb: 3 }}>
-              <AccordionSummary>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6">{workload.name}</Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -209,40 +274,35 @@ export function ProcessView() {
                     onChange={(e) => handleSelectChange(workload.id, e)}
                     displayEmpty
                   >
-                    <MenuItem value="" disabled>Select Workflow Type</MenuItem>
+                    <MenuItem value="" disabled>
+                      Select Workflow Type
+                    </MenuItem>
                     <MenuItem value="Database">Database</MenuItem>
                     <MenuItem value="Web Application">Web Application</MenuItem>
                     <MenuItem value="Machine Learning">Machine Learning</MenuItem>
                     <MenuItem value="Others">Others</MenuItem>
                   </Select>
                 </FormControl>
-                {workload.formData.computes.map((compute) => (
-                  <Accordion key={compute.id} sx={{ mb: 3 }}>
-                    <AccordionSummary>
-                      <Typography variant="h6">{compute.name}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <TextField
-                        fullWidth
-                        name={`vCPU-${compute.id}`}
-                        label="vCPU"
-                        type="number"
-                        value={compute.vCPU}
-                        onChange={(e) => handleComputeChange(workload.id, compute.id, 'vCPU', e.target.value)}
-                        sx={{ mb: 3 }}
-                      />
-                      <TextField
-                        fullWidth
-                        name={`memory-${compute.id}`}
-                        label="Memory (GB)"
-                        type="number"
-                        value={compute.memory}
-                        onChange={(e) => handleComputeChange(workload.id, compute.id, 'memory', e.target.value)}
-                        sx={{ mb: 3 }}
-                      />
-                    </AccordionDetails>
-                  </Accordion>
-                ))}
+                <Typography variant="h6">Compute</Typography>
+                <TextField
+                  fullWidth
+                  name="vCPU"
+                  label="vCPU"
+                  type="number"
+                  value={workload.formData.computes[0].vCPU}
+                  onChange={(e) => handleComputeChange(workload.id, 'vCPU', e.target.value)}
+                  sx={{ mb: 3 }}
+                />
+                <TextField
+                  fullWidth
+                  name="memory"
+                  label="Memory (GB)"
+                  type="number"
+                  value={workload.formData.computes[0].memory}
+                  onChange={(e) => handleComputeChange(workload.id, 'memory', e.target.value)}
+                  sx={{ mb: 3 }}
+                />
+
                 <Typography variant="h6">Storage</Typography>
                 <TextField
                   fullWidth
@@ -276,30 +336,97 @@ export function ProcessView() {
                   <ToggleButtonGroup
                     value={workload.formData.latencySensitivity}
                     exclusive
-                    onChange={(e, value) => handleToggleChange(workload.id, 'latencySensitivity')(e, value)}
+                    onChange={(e, value) =>
+                      handleToggleChange(workload.id, 'latencySensitivity')(e, value)
+                    }
                     aria-label="latency sensitivity"
                   >
-                    <ToggleButton value="Low" aria-label="low" sx={{ backgroundColor: 'green', borderRadius: '8px', color: 'white' }}>
+                    <ToggleButton
+                      value="Low"
+                      aria-label="low"
+                      sx={{ backgroundColor: 'green', borderRadius: '8px', color: 'white' }}
+                    >
                       Low
                     </ToggleButton>
-                    <ToggleButton value="Medium" aria-label="medium" sx={{ backgroundColor: 'yellow', borderRadius: '8px', color: 'black' }}>
+                    <ToggleButton
+                      value="Medium"
+                      aria-label="medium"
+                      sx={{ backgroundColor: 'yellow', borderRadius: '8px', color: 'black' }}
+                    >
                       Medium
                     </ToggleButton>
-                    <ToggleButton value="High" aria-label="high" sx={{ backgroundColor: 'red', borderRadius: '8px', color: 'white' }}>
+                    <ToggleButton
+                      value="High"
+                      aria-label="high"
+                      sx={{ backgroundColor: 'red', borderRadius: '8px', color: 'white' }}
+                    >
                       High
                     </ToggleButton>
                   </ToggleButtonGroup>
                 </FormControl>
+                <br/>
+                <FormControl component="fieldset" sx={{ mb: 3 }}>
+  <FormLabel component="legend">Workload Spike</FormLabel>
+  <RadioGroup
+    name="workloadSpike"
+    value={workload.formData.workloadSpike}
+    onChange={(e) => handleSpikeChange(workload.id, e)}
+  >
+    <FormControlLabel value="Constant" control={<Radio />} label="Constant" />
+    <FormControlLabel value="Daily" control={<Radio />} label="Daily" />
+    <FormControlLabel value="Weekly" control={<Radio />} label="Weekly" />
+    <FormControlLabel value="Monthly" control={<Radio />} label="Monthly" />
+  </RadioGroup>
+</FormControl>
+
+{workload.formData.workloadSpike && (
+  <>
+    <TextField
+      fullWidth
+      name="baseline"
+      label="Baseline (Minimum instances required)"
+      type="number"
+      value={workload.formData.baseline}
+      onChange={(e) => handleChange(workload.id, e)}
+      sx={{ mb: 3 }}
+    />
+
+    <TextField
+      fullWidth
+      name="peak"
+      label="Peak (Maximum instances required during spike)"
+      type="number"
+      value={workload.formData.peak}
+      onChange={(e) => handleChange(workload.id, e)}
+      sx={{ mb: 3 }}
+    />
+  </>
+)}
+
+{workload.formData.workloadSpike === 'Daily' && (
+  <FormControl component="fieldset" sx={{ mb: 3 }}>
+    <FormLabel component="legend">Spike Days</FormLabel>
+    <Box>
+      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+        <FormControlLabel
+          key={day}
+          control={
+            <Checkbox
+              checked={workload.formData.spikeDays.includes(day)}
+              onChange={() => handleSpikeDaysChange(workload.id, day)}
+            />
+          }
+          label={day}
+        />
+      ))}
+    </Box>
+  </FormControl>
+)}
               </AccordionDetails>
             </Accordion>
           ))}
-          <Box justifyContent="center" mt={3}>
-            <Button variant="outlined" onClick={handleAddWorkload} sx={{ mb: 3 }}>
-              Add new Workload
-            </Button>
-          </Box>
         </>
-      )
+      ),
     },
     {
       name: 'Geographic Requirements',
@@ -312,7 +439,9 @@ export function ProcessView() {
               onChange={(e) => handleSelectChange(workloads[0].id, e)}
               displayEmpty
             >
-              <MenuItem value="" disabled>Select Preferred Region</MenuItem>
+              <MenuItem value="" disabled>
+                Select Preferred Region
+              </MenuItem>
               <MenuItem value="north-america">North America</MenuItem>
               <MenuItem value="asia-pacific">Asia Pacific</MenuItem>
               <MenuItem value="europe">Europe</MenuItem>
@@ -324,16 +453,30 @@ export function ProcessView() {
             <ToggleButtonGroup
               value={workloads[0].formData.geographicLatency}
               exclusive
-              onChange={(e, value) => handleToggleChange(workloads[0].id, 'geographicLatency')(e, value)}
+              onChange={(e, value) =>
+                handleToggleChange(workloads[0].id, 'geographicLatency')(e, value)
+              }
               aria-label="geographic latency"
             >
-              <ToggleButton value="Low" aria-label="low" sx={{ backgroundColor: 'green', borderRadius: '8px', color: 'white' }}>
+              <ToggleButton
+                value="Low"
+                aria-label="low"
+                sx={{ backgroundColor: 'green', borderRadius: '8px', color: 'white' }}
+              >
                 Low
               </ToggleButton>
-              <ToggleButton value="Medium" aria-label="medium" sx={{ backgroundColor: 'yellow', borderRadius: '8px', color: 'black' }}>
+              <ToggleButton
+                value="Medium"
+                aria-label="medium"
+                sx={{ backgroundColor: 'yellow', borderRadius: '8px', color: 'black' }}
+              >
                 Medium
               </ToggleButton>
-              <ToggleButton value="High" aria-label="high" sx={{ backgroundColor: 'red', borderRadius: '8px', color: 'white' }}>
+              <ToggleButton
+                value="High"
+                aria-label="high"
+                sx={{ backgroundColor: 'red', borderRadius: '8px', color: 'white' }}
+              >
                 High
               </ToggleButton>
             </ToggleButtonGroup>
@@ -345,7 +488,9 @@ export function ProcessView() {
               onChange={(e) => handleSelectChange(workloads[0].id, e)}
               displayEmpty
             >
-              <MenuItem value="" disabled>Select Compliance Requirement</MenuItem>
+              <MenuItem value="" disabled>
+                Select Compliance Requirement
+              </MenuItem>
               <MenuItem value="GDPR">GDPR</MenuItem>
               <MenuItem value="HIPAA">HIPAA</MenuItem>
               <MenuItem value="Others">Others</MenuItem>
@@ -358,7 +503,9 @@ export function ProcessView() {
               onChange={(e) => handleSelectChange(workloads[0].id, e)}
               displayEmpty
             >
-              <MenuItem value="" disabled>Select Data Residency</MenuItem>
+              <MenuItem value="" disabled>
+                Select Data Residency
+              </MenuItem>
               <MenuItem value="north-america">North America</MenuItem>
               <MenuItem value="asia-pacific">Asia Pacific</MenuItem>
               <MenuItem value="europe">Europe</MenuItem>
@@ -366,7 +513,7 @@ export function ProcessView() {
             </Select>
           </FormControl>
         </>
-      )
+      ),
     },
     {
       name: 'Cost Preferences',
@@ -388,14 +535,16 @@ export function ProcessView() {
               onChange={(e) => handleSelectChange(workloads[0].id, e)}
               displayEmpty
             >
-              <MenuItem value="" disabled>Select Pricing Model</MenuItem>
+              <MenuItem value="" disabled>
+                Select Pricing Model
+              </MenuItem>
               <MenuItem value="on-demand">On-demand</MenuItem>
               <MenuItem value="spot">Spot</MenuItem>
               <MenuItem value="reserved">Reserved</MenuItem>
             </Select>
           </FormControl>
         </>
-      )
+      ),
     },
     {
       name: 'Business Priorities',
@@ -428,7 +577,9 @@ export function ProcessView() {
           <Typography variant="h6">Performance Priority</Typography>
           <Slider
             value={workloads[0].formData.performancePriority}
-            onChange={(e, value) => handleSliderChange(workloads[0].id, 'performancePriority')(e, value)}
+            onChange={(e, value) =>
+              handleSliderChange(workloads[0].id, 'performancePriority')(e, value)
+            }
             aria-labelledby="performance-priority-slider"
             valueLabelDisplay="auto"
             step={1}
@@ -440,7 +591,9 @@ export function ProcessView() {
           <Typography variant="h6">Security Priority</Typography>
           <Slider
             value={workloads[0].formData.securityPriority}
-            onChange={(e, value) => handleSliderChange(workloads[0].id, 'securityPriority')(e, value)}
+            onChange={(e, value) =>
+              handleSliderChange(workloads[0].id, 'securityPriority')(e, value)
+            }
             aria-labelledby="security-priority-slider"
             valueLabelDisplay="auto"
             step={1}
@@ -450,8 +603,8 @@ export function ProcessView() {
             sx={{ mb: 3 }}
           />
         </>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -465,22 +618,22 @@ export function ProcessView() {
       <Stepper nonLinear activeStep={currentStage} sx={{ mb: 5 }}>
         {stages.map((stage, index) => (
           <Step key={stage.name}>
-            <StepButton onClick={() => handleStageClick(index)}>
-              {stage.name}
-            </StepButton>
+            <StepButton onClick={() => handleStageClick(index)}>{stage.name}</StepButton>
           </Step>
         ))}
       </Stepper>
 
       <Card sx={{ p: 3 }}>
         <Box component="form" noValidate autoComplete="off">
-          <Grid container>
-            {stages[currentStage].content}
-          </Grid>
+          <Grid container>{stages[currentStage].content}</Grid>
           <Box display="flex" justifyContent="space-between" mt={3}>
-            {currentStage > 0 && (
+            {currentStage > 0 ? (
               <Button variant="contained" onClick={handlePrevious}>
                 Previous
+              </Button>
+            ) : (
+              <Button variant="outlined" onClick={handleAddWorkload}>
+                Add new Workload
               </Button>
             )}
             {currentStage < stages.length - 1 ? (
