@@ -26,11 +26,14 @@ import {
   InputLabel,
   Checkbox,
   ListItemText,
+  IconButton,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useRouter } from 'src/routes/hooks';
 import { DashboardContent } from 'src/layouts/dashboard';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 
 interface FormData {
   operatingSystem: string;
@@ -72,6 +75,14 @@ export function ProcessView() {
   const router = useRouter();
   const [currentStage, setCurrentStage] = useState<number>(0);
   const [workloadCount, setWorkloadCount] = useState<number>(1);
+  const [selectedOption, setSelectedOption] = useState('preferredRegion');
+  const [preferredRegion, setPreferredRegion] = useState('');
+  const [userSpreadRegions, setUserSpreadRegions] = useState<string[]>([]);
+  const [newRegion, setNewRegion] = useState('');
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editRegion, setEditRegion] = useState('');
+  const [expanded, setExpanded] = useState<number | false>(1);
+
   const [workloads, setWorkloads] = useState<Workload[]>([
     {
       id: 1,
@@ -138,34 +149,64 @@ export function ProcessView() {
 
   const handleToggleChange =
     (workloadId: number, name: keyof FormData) =>
-      (event: React.MouseEvent<HTMLElement>, value: string) => {
-        if (value !== null) {
-          setWorkloads((prevWorkloads) =>
-            prevWorkloads.map((workload) =>
-              workload.id === workloadId
-                ? { ...workload, formData: { ...workload.formData, [name]: value } }
-                : workload
-            )
-          );
-        }
-      };
+    (event: React.MouseEvent<HTMLElement>, value: string) => {
+      if (value !== null) {
+        setWorkloads((prevWorkloads) =>
+          prevWorkloads.map((workload) =>
+            workload.id === workloadId
+              ? { ...workload, formData: { ...workload.formData, [name]: value } }
+              : workload
+          )
+        );
+      }
+    };
+
+  const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedOption(event.target.value);
+  };
+
+  const handlePreferredRegionChange = (event: SelectChangeEvent<string>) => {
+    setPreferredRegion(event.target.value as string);
+  };
+
+  const handleNewRegionChange = (event: SelectChangeEvent<string>) => {
+    setNewRegion(event.target.value as string);
+  };
+
+  const addRegion = () => {
+    if (newRegion && !userSpreadRegions.includes(newRegion)) {
+      setUserSpreadRegions([...userSpreadRegions, newRegion]);
+      setNewRegion('');
+    }
+  };
+  const handleEditRegionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEditRegion(event.target.value);
+  };
+
+  const saveEditRegion = (index: number) => {
+    const updatedRegions = [...userSpreadRegions];
+    updatedRegions[index] = editRegion;
+    setUserSpreadRegions(updatedRegions);
+    setEditIndex(null);
+    setEditRegion('');
+  };
 
   const handleComputeChange = (workloadId: number, field: keyof Compute, value: string) => {
     setWorkloads((prevWorkloads) =>
       prevWorkloads.map((workload) =>
         workload.id === workloadId
           ? {
-            ...workload,
-            formData: {
-              ...workload.formData,
-              computes: [
-                {
-                  ...workload.formData.computes[0],
-                  [field]: value,
-                },
-              ],
-            },
-          }
+              ...workload,
+              formData: {
+                ...workload.formData,
+                computes: [
+                  {
+                    ...workload.formData.computes[0],
+                    [field]: value,
+                  },
+                ],
+              },
+            }
           : workload
       )
     );
@@ -198,14 +239,14 @@ export function ProcessView() {
       prevWorkloads.map((workload) =>
         workload.id === workloadId
           ? {
-            ...workload,
-            formData: {
-              ...workload.formData,
-              spikeDays: workload.formData.spikeDays.includes(day)
-                ? workload.formData.spikeDays.filter((d: any) => d !== day)
-                : [...workload.formData.spikeDays, day],
-            },
-          }
+              ...workload,
+              formData: {
+                ...workload.formData,
+                spikeDays: workload.formData.spikeDays.includes(day)
+                  ? workload.formData.spikeDays.filter((d: any) => d !== day)
+                  : [...workload.formData.spikeDays, day],
+              },
+            }
           : workload
       )
     );
@@ -247,18 +288,26 @@ export function ProcessView() {
       prevWorkloads.map((workload) =>
         workload.id === workloadId
           ? {
-            ...workload,
-            formData: {
-              ...workload.formData,
-              cloudProviders: workload.formData.cloudProviders.includes(provider)
-                ? workload.formData.cloudProviders.filter((p: any) => p !== provider)
-                : [...workload.formData.cloudProviders, provider],
-            },
-          }
+              ...workload,
+              formData: {
+                ...workload.formData,
+                cloudProviders: workload.formData.cloudProviders.includes(provider)
+                  ? workload.formData.cloudProviders.filter((p: any) => p !== provider)
+                  : [...workload.formData.cloudProviders, provider],
+              },
+            }
           : workload
       )
     );
   };
+
+  const handleWorkloadNameChange = (id: number, event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const updatedWorkloads = workloads.map((workload) =>
+      workload.id === id ? { ...workload, name: event.target.value } : workload
+    );
+    setWorkloads(updatedWorkloads);
+  };
+
   const handleNext = () => {
     setCurrentStage((prev) => prev + 1);
   };
@@ -275,23 +324,36 @@ export function ProcessView() {
     router.push('/');
   }, [router]);
 
+  const handleAccordionChange = (id: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpanded(isExpanded ? id : false);
+  };
+
   const stages = [
     {
       name: 'Workload Requirements',
       content: (
         <>
           {workloads.map((workload) => (
-            <Accordion key={workload.id} sx={{ mb: 3 }}>
+            <Accordion key={workload.id}           expanded={expanded === workload.id}
+            onChange={handleAccordionChange(workload.id)} sx={{ mb: 3 }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6">{workload.name}</Typography>
               </AccordionSummary>
               <AccordionDetails>
+              <TextField
+              label="Workload Name"
+              value={workload.name}
+              onChange={(e) => handleWorkloadNameChange(workload.id, e)}
+              fullWidth
+              sx={{ mb: 3 }}
+            />
                 <FormControl fullWidth sx={{ mb: 3 }}>
                   <Select
                     name="workflowType"
                     value={workload.formData.workflowType}
                     onChange={(e) => handleSelectChange(workload.id, e)}
-                    displayEmpty required
+                    displayEmpty
+                    required
                   >
                     <MenuItem value="" disabled>
                       Select Workflow Type
@@ -299,30 +361,31 @@ export function ProcessView() {
                     <MenuItem value="Database">Database</MenuItem>
                     <MenuItem value="Web Application">Web Application</MenuItem>
                     <MenuItem value="Machine Learning">Machine Learning</MenuItem>
+                    <MenuItem value="Orchestrated Container">Orchestrated Container</MenuItem>
                     <MenuItem value="Others">Others</MenuItem>
                   </Select>
                 </FormControl>
 
                 {(workload.formData.workflowType === 'Machine Learning' ||
                   workload.formData.workflowType === 'Web Application') && (
-                    <FormControl fullWidth sx={{ mb: 3 }}>
-                      <Select
-                        name="operatingSystem"
-                        value={workload.formData.operatingSystem}
-                        onChange={(e) => handleSelectChange(workload.id, e)}
-                        displayEmpty
-                      >
-                        <MenuItem value="" disabled>
-                          Select Operating System
-                        </MenuItem>
-                        <MenuItem value="Windows">Windows</MenuItem>
-                        <MenuItem value="Linux">Linux</MenuItem>
-                        <MenuItem value="Unix">Unix</MenuItem>
-                        <MenuItem value="RedHat (RHEL)">RedHat (RHEL)</MenuItem>
-                        <MenuItem value="Others">Others</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
+                  <FormControl fullWidth sx={{ mb: 3 }}>
+                    <Select
+                      name="operatingSystem"
+                      value={workload.formData.operatingSystem}
+                      onChange={(e) => handleSelectChange(workload.id, e)}
+                      displayEmpty
+                    >
+                      <MenuItem value="" disabled>
+                        Select Operating System
+                      </MenuItem>
+                      <MenuItem value="Windows">Windows</MenuItem>
+                      <MenuItem value="Linux">Linux</MenuItem>
+                      <MenuItem value="Unix">Unix</MenuItem>
+                      <MenuItem value="RedHat (RHEL)">RedHat (RHEL)</MenuItem>
+                      <MenuItem value="Others">Others</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
 
                 <Typography variant="h6">Compute</Typography>
                 <TextField
@@ -332,7 +395,8 @@ export function ProcessView() {
                   type="number"
                   value={workload.formData.computes[0].vCPU}
                   onChange={(e) => handleComputeChange(workload.id, 'vCPU', e.target.value)}
-                  sx={{ mb: 3 }} required
+                  sx={{ mb: 3 }}
+                  required
                 />
                 <TextField
                   fullWidth
@@ -341,7 +405,8 @@ export function ProcessView() {
                   type="number"
                   value={workload.formData.computes[0].memory}
                   onChange={(e) => handleComputeChange(workload.id, 'memory', e.target.value)}
-                  sx={{ mb: 3 }} required
+                  sx={{ mb: 3 }}
+                  required
                 />
 
                 <Typography variant="h6">Storage</Typography>
@@ -366,7 +431,8 @@ export function ProcessView() {
                   type="number"
                   value={workload.formData.storageSize}
                   onChange={(e) => handleChange(workload.id, e)}
-                  sx={{ mb: 3 }} required
+                  sx={{ mb: 3 }}
+                  required
                 />
                 <TextField
                   fullWidth
@@ -375,7 +441,8 @@ export function ProcessView() {
                   type="number"
                   value={workload.formData.storagePerformance}
                   onChange={(e) => handleChange(workload.id, e)}
-                  sx={{ mb: 3 }} required
+                  sx={{ mb: 3 }}
+                  required
                 />
                 <FormControl component="fieldset" sx={{ mb: 3 }} required>
                   <FormLabel component="legend">Latency Sensitivity</FormLabel>
@@ -411,6 +478,7 @@ export function ProcessView() {
                   </ToggleButtonGroup>
                 </FormControl>
                 <br />
+                {/*
                 <FormControl component="fieldset" sx={{ mb: 3 }}>
                   <FormLabel component="legend">Workload Spike</FormLabel>
                   <RadioGroup
@@ -476,6 +544,7 @@ export function ProcessView() {
                     </Box>
                   </FormControl>
                 )}
+                */}
               </AccordionDetails>
             </Accordion>
           ))}
@@ -500,7 +569,8 @@ export function ProcessView() {
               name="pricingModel"
               value={workloads[0].formData.pricingModel}
               onChange={(e) => handleSelectChange(workloads[0].id, e)}
-              displayEmpty required
+              displayEmpty
+              required
             >
               <MenuItem value="" disabled>
                 Select Pricing Model
@@ -517,59 +587,134 @@ export function ProcessView() {
       name: 'Business Preferences',
       content: (
         <>
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <Select
-              name="preferredRegion"
-              value={workloads[0].formData.preferredRegion}
-              onChange={(e) => handleSelectChange(workloads[0].id, e)}
-              displayEmpty
-            >
-              <MenuItem value="" disabled>
-                Select Preferred Region
-              </MenuItem>
-              <MenuItem value="north-america">North America</MenuItem>
-              <MenuItem value="asia-pacific">Asia Pacific</MenuItem>
-              <MenuItem value="europe">Europe</MenuItem>
-              <MenuItem value="south-america">South America</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl component="fieldset" sx={{ mb: 3 }} required>
-            <FormLabel component="legend">Criticality</FormLabel>
-            <ToggleButtonGroup
-              value={workloads[0].formData.criticality}
-              exclusive
-              onChange={(e, value) => handleToggleChange(workloads[0].id, 'criticality')(e, value)}
-              aria-label="geographic latency"
-            >
-              <ToggleButton
-                value="Low"
-                aria-label="low"
-                sx={{ backgroundColor: 'green', borderRadius: '8px', color: 'white' }}
+          <Box>
+            <FormControl component="fieldset">
+              <RadioGroup row value={selectedOption} onChange={handleOptionChange}>
+                <FormControlLabel
+                  value="preferredRegion"
+                  control={<Radio />}
+                  label="Preferred Region"
+                />
+                <FormControlLabel value="userSpread" control={<Radio />} label="User Spread" />
+              </RadioGroup>
+            </FormControl>
+
+            {selectedOption === 'preferredRegion' && (
+              <FormControl fullWidth sx={{ mb: 3 }}>
+                <Select
+                  name="preferredRegion"
+                  value={preferredRegion}
+                  onChange={handlePreferredRegionChange}
+                  displayEmpty
+                >
+                  <MenuItem value="" disabled>
+                    Select Preferred Region
+                  </MenuItem>
+                  <MenuItem value="north-america">North America</MenuItem>
+                  <MenuItem value="asia-pacific">Asia Pacific</MenuItem>
+                  <MenuItem value="europe">Europe</MenuItem>
+                  <MenuItem value="south-america">South America</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+
+            {selectedOption === 'userSpread' && (
+              <Box>
+                <FormControl fullWidth sx={{ mb: 3 }}>
+                  <Select
+                    name="newRegion"
+                    value={newRegion}
+                    onChange={handleNewRegionChange}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Region to Add
+                    </MenuItem>
+                    <MenuItem value="North America">North America</MenuItem>
+                    <MenuItem value="Asia Pacific">Asia Pacific</MenuItem>
+                    <MenuItem value="Europe">Europe</MenuItem>
+                    <MenuItem value="South America">South America</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button variant="contained" onClick={addRegion}>
+                  Add Region
+                </Button>
+                <Box sx={{ mt: 2 }}>
+                  {userSpreadRegions.map((region, index) => (
+                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      {editIndex === index ? (
+                        <>
+                          <TextField
+                            value={editRegion}
+                            onChange={handleEditRegionChange}
+                            sx={{ mr: 1 }}
+                          />
+                          <IconButton onClick={() => saveEditRegion(index)}>
+                            <SaveIcon />
+                          </IconButton>
+                        </>
+                      ) : (
+                        <>
+                          <Box sx={{ mr: 1 }}>
+                            {index + 1}. {region}
+                          </Box>
+                          <IconButton
+                            onClick={() => {
+                              setEditIndex(index);
+                              setEditRegion(region);
+                            }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
+
+            <FormControl component="fieldset" sx={{ mb: 3 }} required>
+              <FormLabel component="legend">Criticality</FormLabel>
+              <ToggleButtonGroup
+                value={workloads[0].formData.criticality}
+                exclusive
+                onChange={(e, value) =>
+                  handleToggleChange(workloads[0].id, 'criticality')(e, value)
+                }
+                aria-label="geographic latency"
               >
-                Low
-              </ToggleButton>
-              <ToggleButton
-                value="Medium"
-                aria-label="medium"
-                sx={{ backgroundColor: 'yellow', borderRadius: '8px', color: 'black' }}
-              >
-                Medium
-              </ToggleButton>
-              <ToggleButton
-                value="High"
-                aria-label="high"
-                sx={{ backgroundColor: 'red', borderRadius: '8px', color: 'white' }}
-              >
-                High
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </FormControl>
+                <ToggleButton
+                  value="Low"
+                  aria-label="low"
+                  sx={{ backgroundColor: 'green', borderRadius: '8px', color: 'white' }}
+                >
+                  Low
+                </ToggleButton>
+                <ToggleButton
+                  value="Medium"
+                  aria-label="medium"
+                  sx={{ backgroundColor: 'yellow', borderRadius: '8px', color: 'black' }}
+                >
+                  Medium
+                </ToggleButton>
+                <ToggleButton
+                  value="High"
+                  aria-label="high"
+                  sx={{ backgroundColor: 'red', borderRadius: '8px', color: 'white' }}
+                >
+                  High
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </FormControl>
+          </Box>
           <FormControl fullWidth sx={{ mb: 3 }}>
             <Select
               name="complianceRequirement"
               value={workloads[0].formData.complianceRequirement}
               onChange={(e) => handleSelectChange(workloads[0].id, e)}
-              displayEmpty required
+              displayEmpty
+              required
             >
               <MenuItem value="" disabled>
                 Select Compliance Requirement
@@ -604,7 +749,8 @@ export function ProcessView() {
             inputProps={{ min: 0 }}
             value={workloads[0].formData.numberOfHits}
             onChange={(e) => handleChange(workloads[0].id, e)}
-            sx={{ mb: 3 }} required
+            sx={{ mb: 3 }}
+            required
           />
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -648,7 +794,7 @@ export function ProcessView() {
               </FormControl>
               <Grid>
                 <FormControl component="fieldset" sx={{ mb: 3 }}>
-                  <FormLabel component="legend">Resource Tracker</FormLabel>
+                  <FormLabel component="legend">Track Resources</FormLabel>
                   <RadioGroup
                     name="resourceTracker"
                     value={workloads[0].formData.resourceTracker}
