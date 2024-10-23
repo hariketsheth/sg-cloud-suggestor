@@ -676,6 +676,227 @@
 //     </div>
 //   );
 // }
+// import React, { useState } from 'react';
+// import {
+//   Typography,
+//   Grid,
+//   Accordion,
+//   AccordionSummary,
+//   AccordionDetails,
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   Paper,
+//   Tabs,
+//   Tab,
+//   Box,
+// } from '@mui/material';
+// import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+// // Define a type for the cost data
+// type CostData = {
+//   name: string;
+//   compute: number;
+//   storage: number;
+//   network: number;
+//   total: number;
+// };
+
+// // Define a type for instance details
+// type InstanceDetails = {
+//   instanceName: string;
+//   computeRegion: string;
+//   storageRegion: string;
+//   storageGB: number;
+//   vCPUs: number;
+//   workloadNumber: number;
+// };
+
+// // Define the props for the CostDetailsTable
+// interface CostDetailsTableProps {
+//   provider: string;
+// }
+
+// // Dummy cost data
+// const costData: CostData[] = [
+//   { name: 'AWS', compute: 9658, storage: 156.85, network: 2898.3, total: 12713.15 },
+//   { name: 'On-Prem', compute: 8488, storage: 105.56, network: 1876, total: 8469.56 },
+//   { name: 'AWS + On-Prem', compute: 11000, storage: 300, network: 4000, total: 15300 },
+// ];
+
+// // Dummy instance details with new fields
+// const awsInstanceDetails: InstanceDetails[] = [
+//   { instanceName: 'AWS Instance 1', computeRegion: 'us-east-1', storageRegion: 'us-west-2', storageGB: 500, vCPUs: 16, workloadNumber: 1 },
+//   { instanceName: 'AWS Instance 2', computeRegion: 'eu-central-1', storageRegion: 'eu-west-1', storageGB: 1000, vCPUs: 32, workloadNumber: 2 },
+// ];
+
+// const onPremInstanceDetails: InstanceDetails[] = [
+//   { instanceName: 'On-Prem Instance 1', computeRegion: 'Local-1', storageRegion: 'Local-2', storageGB: 750, vCPUs: 24, workloadNumber: 1 },
+//   { instanceName: 'On-Prem Instance 2', computeRegion: 'Local-3', storageRegion: 'Local-4', storageGB: 900, vCPUs: 32, workloadNumber: 2 },
+// ];
+
+// // Table component that filters and displays cost data for a given provider
+// const CostDetailsTable: React.FC<CostDetailsTableProps> = ({ provider }) => (
+//   <TableContainer component={Paper}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Provider</TableCell>
+//           <TableCell>Compute Cost</TableCell>
+//           <TableCell>Storage Cost</TableCell>
+//           <TableCell>Network Cost</TableCell>
+//           <TableCell>Total Cost</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {costData.filter((data) => data.name === provider).map((row) => (
+//           <TableRow key={row.name}>
+//             <TableCell>{row.name}</TableCell>
+//             <TableCell>{`$${row.compute}`}</TableCell>
+//             <TableCell>{`$${row.storage}`}</TableCell>
+//             <TableCell>{`$${row.network}`}</TableCell>
+//             <TableCell>{`$${row.total}`}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // InstanceDetailsTable that accepts dynamic instance data
+// const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ instanceDetails }) => (
+//   <TableContainer component={Paper} sx={{ mt: 3 }}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Instance Name</TableCell>
+//           <TableCell>Compute Region</TableCell>
+//           <TableCell>Storage Region</TableCell>
+//           <TableCell>Storage (GB)</TableCell>
+//           <TableCell>vCPUs</TableCell>
+//           <TableCell>Workload Number</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {instanceDetails.map((instance) => (
+//           <TableRow key={instance.instanceName}>
+//             <TableCell>{instance.instanceName}</TableCell>
+//             <TableCell>{instance.computeRegion}</TableCell>
+//             <TableCell>{instance.storageRegion}</TableCell>
+//             <TableCell>{instance.storageGB}</TableCell>
+//             <TableCell>{instance.vCPUs}</TableCell>
+//             <TableCell>{instance.workloadNumber}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // Main component for the output page
+// export function OverviewAnalyticsView() {
+//   const [expanded, setExpanded] = useState<string | false>(false);
+//   const [tabValue, setTabValue] = useState(0); // State to handle tab changes
+
+//   const handleAccordionChange = (panel: string) => (
+//     event: React.SyntheticEvent,
+//     isExpanded: boolean
+//   ) => {
+//     setExpanded(isExpanded ? panel : false);
+//   };
+
+//   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+//     setTabValue(newValue);
+//   };
+
+//   return (
+//     <div style={{ padding: '20px' }}>
+//       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+//         Cloud Provider Recommendations
+//       </Typography>
+
+//       <Grid container spacing={3}>
+//         {/* AWS Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel1'}
+//             onChange={handleAccordionChange('panel1')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">AWS</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="AWS" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={awsInstanceDetails} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+
+//         {/* On-Prem Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel2'}
+//             onChange={handleAccordionChange('panel2')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">On-Prem</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="On-Prem" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={onPremInstanceDetails} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+
+//         {/* AWS + On-Prem Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel3'}
+//             onChange={handleAccordionChange('panel3')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">AWS + On-Prem</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="AWS + On-Prem" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+              
+//               {/* Tabs for AWS and On-Prem */}
+//               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+//                 <Tabs value={tabValue} onChange={handleTabChange} aria-label="aws-on-prem-tabs">
+//                   <Tab label="AWS" />
+//                   <Tab label="On-Prem" />
+//                 </Tabs>
+//               </Box>
+//               <Box sx={{ p: 3 }}>
+//                 {tabValue === 0 && (
+//                   <InstanceDetailsTable instanceDetails={awsInstanceDetails} />
+//                 )}
+//                 {tabValue === 1 && (
+//                   <InstanceDetailsTable instanceDetails={onPremInstanceDetails} />
+//                 )}
+//               </Box>
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+//       </Grid>
+//     </div>
+//   );
+// }
 import React, { useState } from 'react';
 import {
   Typography,
@@ -712,7 +933,7 @@ type InstanceDetails = {
   storageRegion: string;
   storageGB: number;
   vCPUs: number;
-  workloadNumber: number;
+  workloadName: string;
 };
 
 // Define the props for the CostDetailsTable
@@ -727,15 +948,25 @@ const costData: CostData[] = [
   { name: 'AWS + On-Prem', compute: 11000, storage: 300, network: 4000, total: 15300 },
 ];
 
-// Dummy instance details with new fields
+// Dummy instance details for AWS, On-Prem, and AWS + On-Prem with unique data
 const awsInstanceDetails: InstanceDetails[] = [
-  { instanceName: 'AWS Instance 1', computeRegion: 'us-east-1', storageRegion: 'us-west-2', storageGB: 500, vCPUs: 16, workloadNumber: 1 },
-  { instanceName: 'AWS Instance 2', computeRegion: 'eu-central-1', storageRegion: 'eu-west-1', storageGB: 1000, vCPUs: 32, workloadNumber: 2 },
+  { instanceName: 'AWS Instance A', computeRegion: 'us-west-1', storageRegion: 'us-east-1', storageGB: 600, vCPUs: 8, workloadName: 'Marley ML' },
+  { instanceName: 'AWS Instance B', computeRegion: 'eu-west-2', storageRegion: 'eu-central-1', storageGB: 300, vCPUs: 16, workloadName: 'Marley DL' },
 ];
 
 const onPremInstanceDetails: InstanceDetails[] = [
-  { instanceName: 'On-Prem Instance 1', computeRegion: 'Local-1', storageRegion: 'Local-2', storageGB: 750, vCPUs: 24, workloadNumber: 1 },
-  { instanceName: 'On-Prem Instance 2', computeRegion: 'Local-3', storageRegion: 'Local-4', storageGB: 900, vCPUs: 32, workloadNumber: 2 },
+  { instanceName: 'On-Prem Instance A', computeRegion: 'Local-Region-1', storageRegion: 'Local-Region-2', storageGB: 750, vCPUs: 24, workloadName: 'Marley ML'  },
+  { instanceName: 'On-Prem Instance B', computeRegion: 'Local-Region-3', storageRegion: 'Local-Region-4', storageGB: 900, vCPUs: 32, workloadName: 'Marley DL' },
+];
+
+const awsOnPremInstanceDetailsAWS: InstanceDetails[] = [
+  { instanceName: 'AWS+On-Prem AWS Instance A', computeRegion: 'us-east-2', storageRegion: 'us-west-1', storageGB: 1000, vCPUs: 64, workloadName: 'Marley ML' },
+  // { instanceName: 'AWS+On-Prem AWS Instance B', computeRegion: 'us-east-1', storageRegion: 'us-west-2', storageGB: 800, vCPUs: 32, workloadName: 'Marley DL' },
+];
+
+const awsOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
+  { instanceName: 'AWS+On-Prem On-Prem Instance A', computeRegion: 'Local-5', storageRegion: 'Local-6', storageGB: 1200, vCPUs: 48, workloadName: 'Marley DL' },
+  // { instanceName: 'AWS+On-Prem On-Prem Instance B', computeRegion: 'Local-7', storageRegion: 'Local-8', storageGB: 1500, vCPUs: 56, workloadName: 402 },
 ];
 
 // Table component that filters and displays cost data for a given provider
@@ -788,7 +1019,7 @@ const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = (
             <TableCell>{instance.storageRegion}</TableCell>
             <TableCell>{instance.storageGB}</TableCell>
             <TableCell>{instance.vCPUs}</TableCell>
-            <TableCell>{instance.workloadNumber}</TableCell>
+            <TableCell>{instance.workloadName}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -884,10 +1115,10 @@ export function OverviewAnalyticsView() {
               </Box>
               <Box sx={{ p: 3 }}>
                 {tabValue === 0 && (
-                  <InstanceDetailsTable instanceDetails={awsInstanceDetails} />
+                  <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsAWS} />
                 )}
                 {tabValue === 1 && (
-                  <InstanceDetailsTable instanceDetails={onPremInstanceDetails} />
+                  <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsOnPrem} />
                 )}
               </Box>
             </AccordionDetails>
@@ -897,3 +1128,5 @@ export function OverviewAnalyticsView() {
     </div>
   );
 }
+
+export default OverviewAnalyticsView;
