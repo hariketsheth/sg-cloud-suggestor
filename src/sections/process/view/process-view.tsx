@@ -51,11 +51,8 @@ interface FormData {
   dataResidency: string;
   maxBudget: string;
   pricingModel: string;
-  costPriority: number;
-  csrPriority: number;
-  performancePriority: number;
-  securityPriority: number;
   numberOfHits: number;
+  resourceTracker: string;
 }
 
 interface Compute {
@@ -92,10 +89,6 @@ export function ProcessView() {
         maxBudget: '',
         pricingModel: '',
         criticality: '',
-        costPriority: 25,
-        csrPriority: 25,
-        performancePriority: 25,
-        securityPriority: 25,
         workloadSpike: '',
         baseline: 0,
         peak: 0,
@@ -103,6 +96,7 @@ export function ProcessView() {
         numberOfHits: 0,
         cloudProviders: ['Azure', 'AWS', 'On-Premises'],
         operatingSystem: '',
+        resourceTracker: '',
       },
     },
   ]);
@@ -144,34 +138,34 @@ export function ProcessView() {
 
   const handleToggleChange =
     (workloadId: number, name: keyof FormData) =>
-    (event: React.MouseEvent<HTMLElement>, value: string) => {
-      if (value !== null) {
-        setWorkloads((prevWorkloads) =>
-          prevWorkloads.map((workload) =>
-            workload.id === workloadId
-              ? { ...workload, formData: { ...workload.formData, [name]: value } }
-              : workload
-          )
-        );
-      }
-    };
+      (event: React.MouseEvent<HTMLElement>, value: string) => {
+        if (value !== null) {
+          setWorkloads((prevWorkloads) =>
+            prevWorkloads.map((workload) =>
+              workload.id === workloadId
+                ? { ...workload, formData: { ...workload.formData, [name]: value } }
+                : workload
+            )
+          );
+        }
+      };
 
   const handleComputeChange = (workloadId: number, field: keyof Compute, value: string) => {
     setWorkloads((prevWorkloads) =>
       prevWorkloads.map((workload) =>
         workload.id === workloadId
           ? {
-              ...workload,
-              formData: {
-                ...workload.formData,
-                computes: [
-                  {
-                    ...workload.formData.computes[0],
-                    [field]: value,
-                  },
-                ],
-              },
-            }
+            ...workload,
+            formData: {
+              ...workload.formData,
+              computes: [
+                {
+                  ...workload.formData.computes[0],
+                  [field]: value,
+                },
+              ],
+            },
+          }
           : workload
       )
     );
@@ -188,19 +182,30 @@ export function ProcessView() {
     );
   };
 
+  const handleResourceChange = (workloadId: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setWorkloads((prevWorkloads) =>
+      prevWorkloads.map((workload) =>
+        workload.id === workloadId
+          ? { ...workload, formData: { ...workload.formData, [name]: value } }
+          : workload
+      )
+    );
+  };
+
   const handleSpikeDaysChange = (workloadId: number, day: string) => {
     setWorkloads((prevWorkloads) =>
       prevWorkloads.map((workload) =>
         workload.id === workloadId
           ? {
-              ...workload,
-              formData: {
-                ...workload.formData,
-                spikeDays: workload.formData.spikeDays.includes(day)
-                  ? workload.formData.spikeDays.filter((d: any) => d !== day)
-                  : [...workload.formData.spikeDays, day],
-              },
-            }
+            ...workload,
+            formData: {
+              ...workload.formData,
+              spikeDays: workload.formData.spikeDays.includes(day)
+                ? workload.formData.spikeDays.filter((d: any) => d !== day)
+                : [...workload.formData.spikeDays, day],
+            },
+          }
           : workload
       )
     );
@@ -225,16 +230,13 @@ export function ProcessView() {
         dataResidency: '',
         maxBudget: '',
         pricingModel: '',
-        costPriority: 25,
-        csrPriority: 25,
-        performancePriority: 25,
-        securityPriority: 25,
         workloadSpike: '',
         baseline: 0,
         peak: 0,
         spikeDays: [],
         numberOfHits: 0,
         cloudProviders: ['Azure', 'AWS', 'On-Premises'],
+        resourceTracker: '',
       },
     };
     setWorkloads([...workloads, newWorkload]);
@@ -245,14 +247,14 @@ export function ProcessView() {
       prevWorkloads.map((workload) =>
         workload.id === workloadId
           ? {
-              ...workload,
-              formData: {
-                ...workload.formData,
-                cloudProviders: workload.formData.cloudProviders.includes(provider)
-                  ? workload.formData.cloudProviders.filter((p: any) => p !== provider)
-                  : [...workload.formData.cloudProviders, provider],
-              },
-            }
+            ...workload,
+            formData: {
+              ...workload.formData,
+              cloudProviders: workload.formData.cloudProviders.includes(provider)
+                ? workload.formData.cloudProviders.filter((p: any) => p !== provider)
+                : [...workload.formData.cloudProviders, provider],
+            },
+          }
           : workload
       )
     );
@@ -289,7 +291,7 @@ export function ProcessView() {
                     name="workflowType"
                     value={workload.formData.workflowType}
                     onChange={(e) => handleSelectChange(workload.id, e)}
-                    displayEmpty
+                    displayEmpty required
                   >
                     <MenuItem value="" disabled>
                       Select Workflow Type
@@ -303,24 +305,24 @@ export function ProcessView() {
 
                 {(workload.formData.workflowType === 'Machine Learning' ||
                   workload.formData.workflowType === 'Web Application') && (
-                  <FormControl fullWidth sx={{ mb: 3 }}>
-                    <Select
-                      name="operatingSystem"
-                      value={workload.formData.operatingSystem}
-                      onChange={(e) => handleSelectChange(workload.id, e)}
-                      displayEmpty
-                    >
-                      <MenuItem value="" disabled>
-                        Select Operating System
-                      </MenuItem>
-                      <MenuItem value="Windows">Windows</MenuItem>
-                      <MenuItem value="Linux">Linux</MenuItem>
-                      <MenuItem value="Unix">Unix</MenuItem>
-                      <MenuItem value="RedHat (RHEL)">RedHat (RHEL)</MenuItem>
-                      <MenuItem value="Others">Others</MenuItem>
-                    </Select>
-                  </FormControl>
-                )}
+                    <FormControl fullWidth sx={{ mb: 3 }}>
+                      <Select
+                        name="operatingSystem"
+                        value={workload.formData.operatingSystem}
+                        onChange={(e) => handleSelectChange(workload.id, e)}
+                        displayEmpty
+                      >
+                        <MenuItem value="" disabled>
+                          Select Operating System
+                        </MenuItem>
+                        <MenuItem value="Windows">Windows</MenuItem>
+                        <MenuItem value="Linux">Linux</MenuItem>
+                        <MenuItem value="Unix">Unix</MenuItem>
+                        <MenuItem value="RedHat (RHEL)">RedHat (RHEL)</MenuItem>
+                        <MenuItem value="Others">Others</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
 
                 <Typography variant="h6">Compute</Typography>
                 <TextField
@@ -330,7 +332,7 @@ export function ProcessView() {
                   type="number"
                   value={workload.formData.computes[0].vCPU}
                   onChange={(e) => handleComputeChange(workload.id, 'vCPU', e.target.value)}
-                  sx={{ mb: 3 }}
+                  sx={{ mb: 3 }} required
                 />
                 <TextField
                   fullWidth
@@ -339,7 +341,7 @@ export function ProcessView() {
                   type="number"
                   value={workload.formData.computes[0].memory}
                   onChange={(e) => handleComputeChange(workload.id, 'memory', e.target.value)}
-                  sx={{ mb: 3 }}
+                  sx={{ mb: 3 }} required
                 />
 
                 <Typography variant="h6">Storage</Typography>
@@ -364,7 +366,7 @@ export function ProcessView() {
                   type="number"
                   value={workload.formData.storageSize}
                   onChange={(e) => handleChange(workload.id, e)}
-                  sx={{ mb: 3 }}
+                  sx={{ mb: 3 }} required
                 />
                 <TextField
                   fullWidth
@@ -373,9 +375,9 @@ export function ProcessView() {
                   type="number"
                   value={workload.formData.storagePerformance}
                   onChange={(e) => handleChange(workload.id, e)}
-                  sx={{ mb: 3 }}
+                  sx={{ mb: 3 }} required
                 />
-                <FormControl component="fieldset" sx={{ mb: 3 }}>
+                <FormControl component="fieldset" sx={{ mb: 3 }} required>
                   <FormLabel component="legend">Latency Sensitivity</FormLabel>
                   <ToggleButtonGroup
                     value={workload.formData.latencySensitivity}
@@ -498,7 +500,7 @@ export function ProcessView() {
               name="pricingModel"
               value={workloads[0].formData.pricingModel}
               onChange={(e) => handleSelectChange(workloads[0].id, e)}
-              displayEmpty
+              displayEmpty required
             >
               <MenuItem value="" disabled>
                 Select Pricing Model
@@ -531,7 +533,7 @@ export function ProcessView() {
               <MenuItem value="south-america">South America</MenuItem>
             </Select>
           </FormControl>
-          <FormControl component="fieldset" sx={{ mb: 3 }}>
+          <FormControl component="fieldset" sx={{ mb: 3 }} required>
             <FormLabel component="legend">Criticality</FormLabel>
             <ToggleButtonGroup
               value={workloads[0].formData.criticality}
@@ -567,7 +569,7 @@ export function ProcessView() {
               name="complianceRequirement"
               value={workloads[0].formData.complianceRequirement}
               onChange={(e) => handleSelectChange(workloads[0].id, e)}
-              displayEmpty
+              displayEmpty required
             >
               <MenuItem value="" disabled>
                 Select Compliance Requirement
@@ -575,6 +577,7 @@ export function ProcessView() {
               <MenuItem value="GDPR">GDPR</MenuItem>
               <MenuItem value="HIPAA">HIPAA</MenuItem>
               <MenuItem value="Others">Others</MenuItem>
+              <MenuItem value="None">None</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth sx={{ mb: 3 }}>
@@ -596,87 +599,68 @@ export function ProcessView() {
           <TextField
             fullWidth
             name="numberOfHits"
-            label="Number of hits/day"
+            label="Number of users/day(max)"
             type="number"
             inputProps={{ min: 0 }}
             value={workloads[0].formData.numberOfHits}
             onChange={(e) => handleChange(workloads[0].id, e)}
-            sx={{ mb: 3 }}
+            sx={{ mb: 3 }} required
           />
-<Grid container spacing={3}>
-  <Grid item xs={12}>
-  <FormControl component="fieldset" sx={{ mb: 3 }}>
-  <FormLabel component="legend">Cloud Provider</FormLabel>
-  <Grid container spacing={2}>
-    <Grid item>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={workloads[0].formData.cloudProviders.includes('Azure')}
-            onChange={() => handleCloudProviderChange(workloads[0].id, 'Azure')}
-          />
-        }
-        label="Azure"
-      />
-    </Grid>
-    <Grid item>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={workloads[0].formData.cloudProviders.includes('AWS')}
-            onChange={() => handleCloudProviderChange(workloads[0].id, 'AWS')}
-          />
-        }
-        label="AWS"
-      />
-    </Grid>
-    <Grid item>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={workloads[0].formData.cloudProviders.includes('On-Premises')}
-            onChange={() => handleCloudProviderChange(workloads[0].id, 'On-Premises')}
-          />
-        }
-        label="On-Premises"
-      />
-    </Grid>
-  </Grid>
-</FormControl>
-  </Grid>
-
-  <Grid item xs={12}>
-    <Box mt={2}>
-      <Typography variant="h5" gutterBottom>
-        Priorities
-      </Typography>
-      <Typography variant="h6">Cost Priority</Typography>
-      <Slider
-        value={workloads[0].formData.costPriority}
-        onChange={(e, value) => handleSliderChange(workloads[0].id, 'costPriority')(e, value)}
-        aria-labelledby="cost-priority-slider"
-        valueLabelDisplay="auto"
-        step={1}
-        marks
-        min={0}
-        max={100}
-        sx={{ mb: 3 }}
-      />
-      <Typography variant="h6">Performance Priority</Typography>
-      <Slider
-        value={workloads[0].formData.performancePriority}
-        onChange={(e, value) => handleSliderChange(workloads[0].id, 'performancePriority')(e, value)}
-        aria-labelledby="performance-priority-slider"
-        valueLabelDisplay="auto"
-        step={1}
-        marks
-        min={0}
-        max={100}
-        sx={{ mb: 3 }}
-      />
-    </Box>
-  </Grid>
-</Grid>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <FormControl component="fieldset" sx={{ mb: 3 }}>
+                <FormLabel component="legend">Cloud Provider</FormLabel>
+                <Grid container spacing={2}>
+                  <Grid item>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={workloads[0].formData.cloudProviders.includes('Azure')}
+                          onChange={() => handleCloudProviderChange(workloads[0].id, 'Azure')}
+                        />
+                      }
+                      label="Azure"
+                    />
+                  </Grid>
+                  <Grid item>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={workloads[0].formData.cloudProviders.includes('AWS')}
+                          onChange={() => handleCloudProviderChange(workloads[0].id, 'AWS')}
+                        />
+                      }
+                      label="AWS"
+                    />
+                  </Grid>
+                  <Grid item>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={workloads[0].formData.cloudProviders.includes('On-Premises')}
+                          onChange={() => handleCloudProviderChange(workloads[0].id, 'On-Premises')}
+                        />
+                      }
+                      label="On-Premises"
+                    />
+                  </Grid>
+                </Grid>
+              </FormControl>
+              <Grid>
+                <FormControl component="fieldset" sx={{ mb: 3 }}>
+                  <FormLabel component="legend">Resource Tracker</FormLabel>
+                  <RadioGroup
+                    name="resourceTracker"
+                    value={workloads[0].formData.resourceTracker}
+                    onChange={(e) => handleResourceChange(workloads[0].id, e)}
+                  >
+                    <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                    <FormControlLabel value="No" control={<Radio />} label="No" />
+                  </RadioGroup>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Grid>
         </>
       ),
     },
