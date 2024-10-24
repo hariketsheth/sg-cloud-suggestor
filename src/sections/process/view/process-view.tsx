@@ -81,6 +81,8 @@ export function ProcessView() {
   const [newRegion, setNewRegion] = useState('');
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editRegion, setEditRegion] = useState('');
+  const [expanded, setExpanded] = useState<number | false>(1);
+
   const [workloads, setWorkloads] = useState<Workload[]>([
     {
       id: 1,
@@ -298,6 +300,14 @@ export function ProcessView() {
       )
     );
   };
+
+  const handleWorkloadNameChange = (id: number, event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const updatedWorkloads = workloads.map((workload) =>
+      workload.id === id ? { ...workload, name: event.target.value } : workload
+    );
+    setWorkloads(updatedWorkloads);
+  };
+
   const handleNext = () => {
     setCurrentStage((prev) => prev + 1);
   };
@@ -314,17 +324,29 @@ export function ProcessView() {
     router.push('/');
   }, [router]);
 
+  const handleAccordionChange = (id: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpanded(isExpanded ? id : false);
+  };
+
   const stages = [
     {
       name: 'Workload Requirements',
       content: (
         <>
           {workloads.map((workload) => (
-            <Accordion key={workload.id} sx={{ mb: 3 }}>
+            <Accordion key={workload.id}           expanded={expanded === workload.id}
+            onChange={handleAccordionChange(workload.id)} sx={{ mb: 3 }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6">{workload.name}</Typography>
               </AccordionSummary>
               <AccordionDetails>
+              <TextField
+              label="Workload Name"
+              value={workload.name}
+              onChange={(e) => handleWorkloadNameChange(workload.id, e)}
+              fullWidth
+              sx={{ mb: 3 }}
+            />
                 <FormControl fullWidth sx={{ mb: 3 }}>
                   <Select
                     name="workflowType"
@@ -772,7 +794,7 @@ export function ProcessView() {
               </FormControl>
               <Grid>
                 <FormControl component="fieldset" sx={{ mb: 3 }}>
-                  <FormLabel component="legend">Resource Tracker</FormLabel>
+                  <FormLabel component="legend">Track Resources</FormLabel>
                   <RadioGroup
                     name="resourceTracker"
                     value={workloads[0].formData.resourceTracker}
