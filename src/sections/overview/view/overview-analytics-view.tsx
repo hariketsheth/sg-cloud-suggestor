@@ -324,6 +324,64 @@ const CSRMetricsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ ins
     </Table>
   </TableContainer>
 );
+const csr1MetricsData: CSRMetrics[] = [
+  { instanceName: 'AWS Instance A', totalCO2: 12.5 },
+  { instanceName: 'AWS Instance B', totalCO2: 7.5 },
+  { instanceName: 'On-Prem Instance A', totalCO2: 7.3 },
+  { instanceName: 'On-Prem Instance B', totalCO2: 5.8 },
+  { instanceName: 'Azure Instance A', totalCO2: 7.5 },
+  { instanceName: 'Azure Instance B', totalCO2: 4.0 },
+  { instanceName: 'AWS+On-Prem AWS Instance A', totalCO2: 7.3 },
+  { instanceName: 'AWS+On-Prem On-Prem Instance A', totalCO2: 7.5 },
+  { instanceName: 'AWS+Azure AWS Instance A', totalCO2: 15.0 },
+  { instanceName: 'AWS+Azure Azure Instance B', totalCO2: 8.0 },
+  { instanceName: 'Azure+On-Prem Azure Instance A', totalCO2: 7.3 },
+  { instanceName: 'Azure+On-Prem On-Prem Instance B', totalCO2: 5.8 },
+  { instanceName: 'MultiCloud Instance A', totalCO2: 7.5  },
+  { instanceName: 'MultiCloud Instance B', totalCO2: 4.0 },
+];
+
+const calculateTotalEmissions = (instanceData: CSRMetrics[]) => {
+  const totals = {
+    AWS: 0,
+    'On-Prem': 0,
+    'Azure': 0,
+    'AWS + On-Prem': 0,
+    'AWS + Azure': 0,
+    'Azure + On-Prem': 0,
+    'Multi Cloud': 0,
+  };
+
+  instanceData.forEach(data => {
+    if (data.instanceName==='AWS Instance A' || data.instanceName==='AWS Instance B') {
+      totals.AWS += data.totalCO2;
+    }
+    if (data.instanceName==='On-Prem Instance A' || data.instanceName==='On-Prem Instance B') {
+      totals['On-Prem'] += data.totalCO2;
+    }
+    if (data.instanceName==='Azure Instance A' || data.instanceName==='Azure Instance B') {
+      totals.Azure += data.totalCO2;
+    }
+    if (data.instanceName==='AWS+On-Prem AWS Instance A' || data.instanceName==='AWS+On-Prem On-Prem Instance A') {
+      totals['AWS + On-Prem'] += data.totalCO2;
+    }
+    if (data.instanceName==='AWS+Azure AWS Instance A' || data.instanceName==='AWS+Azure Azure Instance B') {
+      totals['AWS + Azure'] += data.totalCO2;
+    }
+    if (data.instanceName==='Azure+On-Prem Azure Instance A' || data.instanceName==='Azure+On-Prem On-Prem Instance B') {
+      totals['Azure + On-Prem'] += data.totalCO2;
+    }
+    if (data.instanceName==='MultiCloud Instance A' || data.instanceName==='MultiCloud Instance B') {
+      totals['Multi Cloud'] += data.totalCO2;
+    }
+  });
+
+  return totals;
+};
+
+
+
+
 const calculateProjectedCosts = (costData: CostData[], years: number) =>
   costData.map((data) => ({
     name: data.name,
@@ -331,6 +389,8 @@ const calculateProjectedCosts = (costData: CostData[], years: number) =>
   }));
 
 export function OverviewAnalyticsView() {
+  const totalEmissions = calculateTotalEmissions(csr1MetricsData);
+
   const [selectedProvider, setSelectedProvider] = useState<string>('Azure'); // State to handle selected provider
   const bestCloudProvider = 'Azure';
   const [expanded, setExpanded] = useState<string | false>(false);
@@ -342,6 +402,22 @@ export function OverviewAnalyticsView() {
     data.instanceName.includes(bestCloudProvider)
   )?.totalCO2;
   // Data for the bar chart
+  const lineChartData = {
+    series: [
+      {
+        name: 'Carbon Emissions by Provider (kg/month)',
+        data: [
+          totalEmissions.AWS,            // Total AWS emissions
+          totalEmissions['On-Prem'],     // Total On-Prem emissions
+          totalEmissions.Azure,          // Total Azure emissions
+          totalEmissions['AWS + On-Prem'], // Total AWS + On-Prem emissions
+          totalEmissions['AWS + Azure'], // Total AWS + Azure emissions
+          totalEmissions['Azure + On-Prem'], // Total Azure + On-Prem emissions
+          totalEmissions['Multi Cloud'], // Total Multi Cloud emissions
+        ],
+      },
+    ],
+  };
   const barChartData = {
     series: [
       {
@@ -666,6 +742,53 @@ export function OverviewAnalyticsView() {
             </Grid>
           </Grid>
         </div>
+        <div style={{ padding: '20px' }}>
+      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+        Carbon Emissions Overview
+      </Typography>
+
+      <Grid container spacing={3}>
+        {/* Line Graph for Carbon Emissions */}
+        <Grid xs={12}>
+          <Typography variant="h6">Carbon Emissions by Provider</Typography>
+          <Chart
+            type="line"
+            series={lineChartData.series}
+            options={{
+              xaxis: {
+                categories: [
+                  'AWS', 'On-Prem', 'Azure', 'AWS + On-Prem', 'AWS + Azure', 'Azure + On-Prem', 'Multi Cloud',
+                ], // Only showing total emissions for each provider
+              },
+              yaxis: {
+                title: {
+                  text: 'Total CO2 (g/month)',
+                },
+                labels: {
+                  formatter: (value: number) => `${value.toFixed(2)} g`,
+                },
+              },
+              tooltip: {
+                y: {
+                  formatter: (value: number) => `${value.toFixed(2)} g`,
+                },
+              },
+              dataLabels: {
+                enabled: true, // Enable data labels
+                formatter: (value: number) => `${value.toFixed(2)} g`, // Format data labels
+              },
+            }}
+            height={364}
+          />
+        </Grid>
+      </Grid>
+    </div>
+    <br/>
+    <br/>
+    <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+      Cloud Provider Comparison
+          </Typography>
+
 
         <TableContainer component={Paper}>
           <Table>
