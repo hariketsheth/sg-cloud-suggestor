@@ -15,6 +15,8 @@ import {
   Box,
   Card,
   CardActionArea,
+  Slider,
+  Chip,
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
@@ -22,6 +24,10 @@ import CloudIcon from '@mui/icons-material/Cloud';
 import StorageIcon from '@mui/icons-material/Storage';
 import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import { _tasks, _posts, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -29,6 +35,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { AnalyticsCloudProvider } from '../analytics-cloud-provider';
 import { AnalyticsCloudMigration } from '../analytics-cloud-migration';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
+import { Chart } from 'src/components/chart';
 
 // Define a type for the cost data
 type CostData = {
@@ -46,6 +53,7 @@ type InstanceDetails = {
   storageGB: number;
   vCPUs: number;
   workloadName: string;
+  totalCO2?: number; // Optional property for total CO2
 };
 
 // Define a type for CSR metrics
@@ -61,83 +69,175 @@ interface CostDetailsTableProps {
 // ----------------------------------------------------------------------
 // Dummy cost data
 const costData: CostData[] = [
-  { name: 'AWS', compute: 9658, storage: 156.85, total: 9814.85 },
-  { name: 'On-Prem', compute: 8488, storage: 105.56, total: 8593.56 },
-  { name: 'AWS + On-Prem', compute: 11000, storage: 300, total: 11300 },
-  { name: 'AWS', compute: 9658, storage: 156.85, total: 9814.85 },
-  { name: 'On-Prem', compute: 8488, storage: 105.56, total: 8593.56 },
-  { name: 'AWS + On-Prem', compute: 11000, storage: 300, total: 11300 },
+  { name: 'AWS', compute: 1619.28, storage: 1036.32, total: 2655.6 },
+  { name: 'Azure', compute: 1295.4, storage: 647.76, total: 1943.16 },
+  { name: 'On-Prem', compute: 998.52, storage: 1116, total: 2114.52 },
+  { name: 'AWS + On-Prem', compute: 998.52, storage: 960, total: 1958.52 },
+  { name: 'AWS + Azure', compute: 1619, storage: 971.64, total: 2590.64 },
+  { name: 'Azure + On-Prem', compute: 998.52, storage: 1116, total: 2114.52 },
+  { name: 'Multi Cloud', compute: 1295.4, storage: 647.76, total: 1943.16 },
 ];
 
-// Dummy instance details for AWS, On-Prem, and AWS + On-Prem with unique data
 const awsInstanceDetails: InstanceDetails[] = [
   {
-    instanceName: 'AWS Instance A',
-    computeRegion: 'us-west-1',
-    storageRegion: 'us-east-1',
-    storageGB: 600,
-    vCPUs: 8,
+    instanceName: 'r6i.xlarge',
+    computeRegion: 'Europe',
+    storageRegion: '-',
+    storageGB: 32,
+    vCPUs: 4,
     workloadName: 'Marley ML',
   },
   {
-    instanceName: 'AWS Instance B',
-    computeRegion: 'eu-west-2',
-    storageRegion: 'eu-central-1',
-    storageGB: 300,
-    vCPUs: 16,
+    instanceName: 'sb.m5.large',
+    computeRegion: '-',
+    storageRegion: 'Europe',
+    storageGB: 8,
+    vCPUs: 2,
     workloadName: 'Marley DL',
+  },
+];
+
+const azureInstanceDetails: InstanceDetails[] = [
+  {
+    instanceName: 'Standard D4s v5',
+    computeRegion: 'Europe',
+    storageRegion: '-',
+    storageGB: 32,
+    vCPUs: 4,
+    workloadName: 'Marley ML',
+    totalCO2: 7.5,
+  },
+  {
+    instanceName: 'Standard D2s v5',
+    computeRegion: '-',
+    storageRegion: 'Europe',
+    storageGB: 8,
+    vCPUs: 2,
+    workloadName: 'Marley DL',
+    totalCO2: 4.0,
   },
 ];
 
 const onPremInstanceDetails: InstanceDetails[] = [
   {
-    instanceName: 'On-Prem Instance A',
-    computeRegion: 'Local-Region-1',
-    storageRegion: 'Local-Region-2',
-    storageGB: 750,
-    vCPUs: 24,
+    instanceName: 'large-mem32',
+    computeRegion: 'eu-fr-paris-2',
+    storageRegion: '-',
+    storageGB: 32,
+    vCPUs: 4,
     workloadName: 'Marley ML',
   },
   {
-    instanceName: 'On-Prem Instance B',
-    computeRegion: 'Local-Region-3',
-    storageRegion: 'Local-Region-4',
-    storageGB: 900,
-    vCPUs: 32,
+    instanceName: 'Postgres-OCS-2vCPU-8GB',
+    computeRegion: '-',
+    storageRegion: 'eu-fr-north-1',
+    storageGB: 8,
+    vCPUs: 2,
     workloadName: 'Marley DL',
   },
 ];
 
 const awsOnPremInstanceDetailsAWS: InstanceDetails[] = [
   {
-    instanceName: 'AWS+On-Prem AWS Instance A',
-    computeRegion: 'us-east-2',
-    storageRegion: 'us-west-1',
-    storageGB: 1000,
-    vCPUs: 64,
+    instanceName: 'large-mem32',
+    computeRegion: 'eu-fr-paris-2',
+    storageRegion: '-',
+    storageGB: 32,
+    vCPUs: 4,
     workloadName: 'Marley ML',
   },
 ];
 
 const awsOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
   {
-    instanceName: 'AWS+On-Prem On-Prem Instance A',
-    computeRegion: 'Local-5',
-    storageRegion: 'Local-6',
-    storageGB: 1200,
-    vCPUs: 48,
+    instanceName: 'db.m5.large',
+    computeRegion: '-',
+    storageRegion: 'Europe',
+    storageGB: 8,
+    vCPUs: 2,
+    workloadName: 'Marley DL',
+  },
+];
+
+const azureOnPremInstanceDetailsAzure: InstanceDetails[] = [
+  {
+    instanceName: 'large-mem32',
+    computeRegion: 'eu-fr-paris-2',
+    storageRegion: '-',
+    storageGB: 32,
+    vCPUs: 4,
+    workloadName: 'Marley ML',
+  },
+];
+
+const azureOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
+  {
+    instanceName: 'Postgres-OCS-2vCPU-8GB',
+    computeRegion: '-',
+    storageRegion: 'eu-fr-north-1',
+    storageGB: 8,
+    vCPUs: 2,
+    workloadName: 'Marley DL',
+  },
+];
+
+const awsAzureInstanceDetailsAWS: InstanceDetails[] = [
+  {
+    instanceName: 'large-mem32',
+    computeRegion: 'eu-fr-paris-2',
+    storageRegion: '-',
+    storageGB: 32,
+    vCPUs: 4,
+    workloadName: 'Marley ML',
+  },
+];
+
+const awsAzureInstanceDetailsAzure: InstanceDetails[] = [
+  {
+    instanceName: 'db.m5.large',
+    computeRegion: '-',
+    storageRegion: 'Europe',
+    storageGB: 8,
+    vCPUs: 2,
+    workloadName: 'Marley DL',
+  },
+];
+
+const multiCloudInstanceDetails: InstanceDetails[] = [
+  {
+    instanceName: 'Standard D4s v5 MC',
+    computeRegion: 'Europe',
+    storageRegion: '-',
+    storageGB: 32,
+    vCPUs: 4,
+    workloadName: 'Marley ML',
+  },
+  {
+    instanceName: 'Standard D2s v5 MC',
+    computeRegion: '-',
+    storageRegion: 'Europe',
+    storageGB: 8,
+    vCPUs: 2,
     workloadName: 'Marley DL',
   },
 ];
 
 // Dummy CSR metrics data
 const csrMetricsData: CSRMetrics[] = [
-  { instanceName: 'AWS Instance A', totalCO2: 4.041 },
-  { instanceName: 'AWS Instance B', totalCO2: 3.04 },
-  { instanceName: 'On-Prem Instance A', totalCO2: 4.091 },
-  { instanceName: 'On-Prem Instance B', totalCO2: 3.908 },
-  { instanceName: 'AWS+On-Prem AWS Instance A', totalCO2: 5.403 },
-  { instanceName: 'AWS+On-Prem On-Prem Instance A', totalCO2: 3.001 },
+  { instanceName: 'r6i.xlarge', totalCO2: 12.5 },
+  { instanceName: 'sb.m5.large', totalCO2: 7.5 },
+  { instanceName: 'large-mem32', totalCO2: 7.3 },
+  { instanceName: 'Postgres-OCS-2vCPU-8GB', totalCO2: 5.8 },
+  { instanceName: 'Standard D4s v5', totalCO2: 7.5 },
+  { instanceName: 'Standard D2s v5', totalCO2: 4.0 },
+  { instanceName: 'AWS+On-Prem AWS Instance A', totalCO2: 7.3 },
+  { instanceName: 'AWS+On-Prem On-Prem Instance A', totalCO2: 7.5 },
+  { instanceName: 'AWS+Azure AWS Instance A', totalCO2: 15.0 },
+  { instanceName: 'AWS+Azure Azure Instance B', totalCO2: 8.0 },
+  { instanceName: 'Azure+On-Prem Azure Instance A', totalCO2: 7.3 },
+  { instanceName: 'Azure+On-Prem On-Prem Instance B', totalCO2: 5.8 },
+  { instanceName: 'Standard D4s v5 MC', totalCO2: 7.5 },
+  { instanceName: 'Standard D2s v5 MC', totalCO2: 4.0 },
 ];
 
 // Table component that filters and displays cost data for a given provider
@@ -168,8 +268,6 @@ const CostDetailsTable: React.FC<CostDetailsTableProps> = ({ provider }) => (
   </TableContainer>
 );
 
-
-
 // InstanceDetailsTable that accepts dynamic instance data
 const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({
   instanceDetails,
@@ -183,7 +281,6 @@ const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = (
           <TableCell>Storage Region</TableCell>
           <TableCell>Storage (GB)</TableCell>
           <TableCell>vCPUs</TableCell>
-          <TableCell>Workload Name</TableCell>
           <TableCell>Workload Name</TableCell>
         </TableRow>
       </TableHead>
@@ -227,13 +324,35 @@ const CSRMetricsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ ins
     </Table>
   </TableContainer>
 );
+const calculateProjectedCosts = (costData: CostData[], years: number) =>
+  costData.map((data) => ({
+    name: data.name,
+    projectedTotal: data.total * 1.1 ** (years - 1), // 10% growth rate for total cost
+  }));
 
 export function OverviewAnalyticsView() {
-  const [selectedProvider, setSelectedProvider] = useState<string>('AWS'); // State to handle selected provider
-const bestCloudProvider = 'AWS'; 
+  const [selectedProvider, setSelectedProvider] = useState<string>('Azure'); // State to handle selected provider
+  const bestCloudProvider = 'Azure';
   const [expanded, setExpanded] = useState<string | false>(false);
   const [tabValue, setTabValue] = useState(0);
-
+  const [years, setYears] = useState(1); // State for the slider
+  const projectedCosts = calculateProjectedCosts(costData, years);
+  const bestProviderData = costData.find((data) => data.name === bestCloudProvider);
+  const bestProviderCO2 = csrMetricsData.find((data) =>
+    data.instanceName.includes(bestCloudProvider)
+  )?.totalCO2;
+  // Data for the bar chart
+  const barChartData = {
+    series: [
+      {
+        name: 'Total Cost',
+        data: projectedCosts.map((data) => data.projectedTotal),
+      },
+    ],
+  };
+  const handleSliderChange = (event: Event, newValue: number | number[]) => {
+    setYears(newValue as number);
+  };
   const handleAccordionChange =
     (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(isExpanded ? panel : false);
@@ -287,7 +406,8 @@ const bestCloudProvider = 'AWS';
             />
           </Grid>
         </Grid>
-
+        <br />
+        <br />
         <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
           Cloud Provider Recommendations
         </Typography>
@@ -332,8 +452,12 @@ const bestCloudProvider = 'AWS';
                           {provider}
                         </Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                          {provider.includes('AWS') && <img width="60" src="/assets/aws.png" alt="AWS" />}
-                          {provider.includes('Azure') && <img width="50" src="/assets/azure.png" alt="AWS" />}
+                          {provider.includes('AWS') && (
+                            <img width="60" src="/assets/aws.png" alt="AWS" />
+                          )}
+                          {provider.includes('Azure') && (
+                            <img width="50" src="/assets/azure.png" alt="AWS" />
+                          )}
                           {provider.includes('On-Prem') && <StorageIcon sx={{ fontSize: 40 }} />}
                         </Box>
                       </Box>
@@ -365,8 +489,14 @@ const bestCloudProvider = 'AWS';
                 {selectedProvider === 'AWS' && (
                   <InstanceDetailsTable instanceDetails={awsInstanceDetails} />
                 )}
+                {selectedProvider === 'Azure' && (
+                  <InstanceDetailsTable instanceDetails={azureInstanceDetails} />
+                )}
                 {selectedProvider === 'On-Prem' && (
                   <InstanceDetailsTable instanceDetails={onPremInstanceDetails} />
+                )}
+                {selectedProvider === 'Multi Cloud' && (
+                  <InstanceDetailsTable instanceDetails={multiCloudInstanceDetails} />
                 )}
                 {selectedProvider === 'AWS + On-Prem' && (
                   <>
@@ -390,7 +520,48 @@ const bestCloudProvider = 'AWS';
                     </Box>
                   </>
                 )}
-                {/* Add similar conditions for other providers if needed */}
+                {selectedProvider === 'Azure + On-Prem' && (
+                  <>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                      <Tabs
+                        value={tabValue}
+                        onChange={handleTabChange}
+                        aria-label="aws-on-prem-tabs"
+                      >
+                        <Tab label="Azure" />
+                        <Tab label="On-Prem" />
+                      </Tabs>
+                    </Box>
+                    <Box sx={{ p: 3 }}>
+                      {tabValue === 0 && (
+                        <InstanceDetailsTable instanceDetails={azureOnPremInstanceDetailsAzure} />
+                      )}
+                      {tabValue === 1 && (
+                        <InstanceDetailsTable instanceDetails={azureOnPremInstanceDetailsOnPrem} />
+                      )}
+                    </Box>
+                  </>
+                )}
+                {selectedProvider === 'AWS + Azure' && (
+                  <>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                      <Tabs
+                        value={tabValue}
+                        onChange={handleTabChange}
+                        aria-label="aws-on-prem-tabs"
+                      >
+                        <Tab label="AWS" />
+                        <Tab label="Azure" />
+                      </Tabs>
+                    </Box>
+                    <Box sx={{ p: 3 }}>
+                      {tabValue === 0 && <InstanceDetailsTable instanceDetails={awsAzureInstanceDetailsAWS} />}
+                      {tabValue === 1 && (
+                        <InstanceDetailsTable instanceDetails={awsAzureInstanceDetailsAzure} />
+                      )}
+                    </Box>
+                  </>
+                )}
               </AccordionDetails>
             </Accordion>
             <Accordion expanded={expanded === 'panel3'} onChange={handleAccordionChange('panel3')}>
@@ -403,6 +574,12 @@ const bestCloudProvider = 'AWS';
                 )}
                 {selectedProvider === 'On-Prem' && (
                   <CSRMetricsTable instanceDetails={onPremInstanceDetails} />
+                )}
+                {selectedProvider === 'Azure' && (
+                  <CSRMetricsTable instanceDetails={azureInstanceDetails} />
+                )}
+                {selectedProvider === 'Multi Cloud' && (
+                  <CSRMetricsTable instanceDetails={multiCloudInstanceDetails} />
                 )}
                 {selectedProvider === 'AWS + On-Prem' && (
                   <>
@@ -431,6 +608,139 @@ const bestCloudProvider = 'AWS';
             </Accordion>
           </Grid>
         </Grid>
+        <br />
+        <div style={{ padding: '20px' }}>
+          <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+            Graph Projections
+          </Typography>
+
+          <Grid container spacing={3}>
+            {/* Bar Graph for Cost Projections */}
+            <Grid xs={12}>
+              <Typography variant="h6">Projected Total Costs Over Years</Typography>
+              <Slider
+                value={years}
+                min={1}
+                max={5}
+                onChange={handleSliderChange}
+                valueLabelDisplay="auto"
+                marks
+                step={1}
+                sx={{ mb: 2 }}
+              />
+              <Chart
+                type="bar"
+                series={barChartData.series}
+                options={{
+                  xaxis: {
+                    categories: projectedCosts.map((data) => data.name),
+                  },
+                  yaxis: {
+                    title: {
+                      text: 'Total Cost ($)',
+                    },
+                    labels: {
+                      formatter: (value: number) => `$${value.toFixed(2)}`,
+                    },
+                  },
+                  plotOptions: {
+                    bar: {
+                      barHeight: '50%', // Adjust bar width
+                      dataLabels: {
+                        position: 'top', // Position the data labels on top of bars
+                      },
+                    },
+                  },
+                  tooltip: {
+                    y: {
+                      formatter: (value: number) => `$${value.toFixed(2)}`,
+                    },
+                  },
+                  dataLabels: {
+                    enabled: true, // Enable data labels
+                    formatter: (value: number) => `$${value.toFixed(2)}`, // Format data labels
+                  },
+                }}
+                height={364}
+              />
+            </Grid>
+          </Grid>
+        </div>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Provider</TableCell>
+                <TableCell>Compute Cost</TableCell>
+                <TableCell>Storage Cost</TableCell>
+                <TableCell>Total Cost</TableCell>
+                <TableCell>Total CO2 (g/month)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {costData.map((row) => {
+                const csrData = csrMetricsData.find((csr) => csr.instanceName.includes(row.name));
+                const isBestProvider = row.name === bestCloudProvider;
+                const isCostBetter = bestProviderData && row.total < bestProviderData.total;
+                const isCO2Better =
+                  bestProviderCO2 && csrData && csrData.totalCO2 < bestProviderCO2;
+
+                return (
+                  <TableRow
+                    key={row.name}
+                    sx={{ backgroundColor: isBestProvider ? '#fff8e0' : 'inherit' }}
+                  >
+                    <TableCell>
+                      {row.name}
+                      {isBestProvider && (
+                        <Chip
+                          label="Best Cloud Recommended"
+                          sx={{ ml: 1, backgroundColor: '#a39770', color: 'white' }}
+                          size="small"
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell>{`$${row.compute}`}</TableCell>
+                    <TableCell>{`$${row.storage}`}</TableCell>
+                    <TableCell
+                      sx={{
+                        color: isCostBetter
+                          ? 'green'
+                          : bestProviderData && row.total > bestProviderData.total
+                            ? 'red'
+                            : 'inherit',
+                      }}
+                    >
+                      {`$${row.total}`}
+                      {isCostBetter ? (
+                        <ArrowDownwardIcon sx={{ ml: 1, color: 'green' }} />
+                      ) : bestProviderData && row.total > bestProviderData.total ? (
+                        <ArrowUpwardIcon sx={{ ml: 1, color: 'red' }} />
+                      ) : null}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: isCO2Better
+                          ? 'green'
+                          : csrData && csrData.totalCO2 > (bestProviderCO2 ?? 0)
+                            ? 'red'
+                            : 'inherit',
+                      }}
+                    >
+                      {csrData ? csrData.totalCO2 : 'N/A'}
+                      {isCO2Better ? (
+                        <ArrowDownwardIcon sx={{ ml: 1, color: 'green' }} />
+                      ) : csrData && csrData.totalCO2 > (bestProviderCO2 ?? 0) ? (
+                        <ArrowUpwardIcon sx={{ ml: 1, color: 'red' }} />
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </DashboardContent>
     </>
   );
