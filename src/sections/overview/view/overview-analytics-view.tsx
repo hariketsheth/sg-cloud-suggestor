@@ -897,6 +897,791 @@
 //     </div>
 //   );
 // }
+// import React, { useState } from 'react';
+// import {
+//   Typography,
+//   Grid,
+//   Accordion,
+//   AccordionSummary,
+//   AccordionDetails,
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   Paper,
+//   Tabs,
+//   Tab,
+//   Box,
+// } from '@mui/material';
+// import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+// // Define a type for the cost data
+// type CostData = {
+//   name: string;
+//   compute: number;
+//   storage: number;
+//   network: number;
+//   total: number;
+// };
+
+// // Define a type for instance details
+// type InstanceDetails = {
+//   instanceName: string;
+//   computeRegion: string;
+//   storageRegion: string;
+//   storageGB: number;
+//   vCPUs: number;
+//   workloadName: string;
+// };
+
+// // Define the props for the CostDetailsTable
+// interface CostDetailsTableProps {
+//   provider: string;
+// }
+
+// // Dummy cost data
+// const costData: CostData[] = [
+//   { name: 'AWS', compute: 9658, storage: 156.85, network: 2898.3, total: 12713.15 },
+//   { name: 'On-Prem', compute: 8488, storage: 105.56, network: 1876, total: 8469.56 },
+//   { name: 'AWS + On-Prem', compute: 11000, storage: 300, network: 4000, total: 15300 },
+// ];
+
+// // Dummy instance details for AWS, On-Prem, and AWS + On-Prem with unique data
+// const awsInstanceDetails: InstanceDetails[] = [
+//   { instanceName: 'AWS Instance A', computeRegion: 'us-west-1', storageRegion: 'us-east-1', storageGB: 600, vCPUs: 8, workloadName: 'Marley ML' },
+//   { instanceName: 'AWS Instance B', computeRegion: 'eu-west-2', storageRegion: 'eu-central-1', storageGB: 300, vCPUs: 16, workloadName: 'Marley DL' },
+// ];
+
+// const onPremInstanceDetails: InstanceDetails[] = [
+//   { instanceName: 'On-Prem Instance A', computeRegion: 'Local-Region-1', storageRegion: 'Local-Region-2', storageGB: 750, vCPUs: 24, workloadName: 'Marley ML'  },
+//   { instanceName: 'On-Prem Instance B', computeRegion: 'Local-Region-3', storageRegion: 'Local-Region-4', storageGB: 900, vCPUs: 32, workloadName: 'Marley DL' },
+// ];
+
+// const awsOnPremInstanceDetailsAWS: InstanceDetails[] = [
+//   { instanceName: 'AWS+On-Prem AWS Instance A', computeRegion: 'us-east-2', storageRegion: 'us-west-1', storageGB: 1000, vCPUs: 64, workloadName: 'Marley ML' },
+//   // { instanceName: 'AWS+On-Prem AWS Instance B', computeRegion: 'us-east-1', storageRegion: 'us-west-2', storageGB: 800, vCPUs: 32, workloadName: 'Marley DL' },
+// ];
+
+// const awsOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
+//   { instanceName: 'AWS+On-Prem On-Prem Instance A', computeRegion: 'Local-5', storageRegion: 'Local-6', storageGB: 1200, vCPUs: 48, workloadName: 'Marley DL' },
+//   // { instanceName: 'AWS+On-Prem On-Prem Instance B', computeRegion: 'Local-7', storageRegion: 'Local-8', storageGB: 1500, vCPUs: 56, workloadName: 402 },
+// ];
+
+// // Table component that filters and displays cost data for a given provider
+// const CostDetailsTable: React.FC<CostDetailsTableProps> = ({ provider }) => (
+//   <TableContainer component={Paper}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Provider</TableCell>
+//           <TableCell>Compute Cost</TableCell>
+//           <TableCell>Storage Cost</TableCell>
+//           <TableCell>Network Cost</TableCell>
+//           <TableCell>Total Cost</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {costData.filter((data) => data.name === provider).map((row) => (
+//           <TableRow key={row.name}>
+//             <TableCell>{row.name}</TableCell>
+//             <TableCell>{`$${row.compute}`}</TableCell>
+//             <TableCell>{`$${row.storage}`}</TableCell>
+//             <TableCell>{`$${row.network}`}</TableCell>
+//             <TableCell>{`$${row.total}`}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // InstanceDetailsTable that accepts dynamic instance data
+// const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ instanceDetails }) => (
+//   <TableContainer component={Paper} sx={{ mt: 3 }}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Instance Name</TableCell>
+//           <TableCell>Compute Region</TableCell>
+//           <TableCell>Storage Region</TableCell>
+//           <TableCell>Storage (GB)</TableCell>
+//           <TableCell>vCPUs</TableCell>
+//           <TableCell>Workload Number</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {instanceDetails.map((instance) => (
+//           <TableRow key={instance.instanceName}>
+//             <TableCell>{instance.instanceName}</TableCell>
+//             <TableCell>{instance.computeRegion}</TableCell>
+//             <TableCell>{instance.storageRegion}</TableCell>
+//             <TableCell>{instance.storageGB}</TableCell>
+//             <TableCell>{instance.vCPUs}</TableCell>
+//             <TableCell>{instance.workloadName}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // Main component for the output page
+// export function OverviewAnalyticsView() {
+//   const [expanded, setExpanded] = useState<string | false>(false);
+//   const [tabValue, setTabValue] = useState(0); // State to handle tab changes
+
+//   const handleAccordionChange = (panel: string) => (
+//     event: React.SyntheticEvent,
+//     isExpanded: boolean
+//   ) => {
+//     setExpanded(isExpanded ? panel : false);
+//   };
+
+//   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+//     setTabValue(newValue);
+//   };
+
+//   return (
+//     <div style={{ padding: '20px' }}>
+//       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+//         Cloud Provider Recommendations
+//       </Typography>
+
+//       <Grid container spacing={3}>
+//         {/* AWS Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel1'}
+//             onChange={handleAccordionChange('panel1')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">AWS</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="AWS" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={awsInstanceDetails} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+
+//         {/* On-Prem Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel2'}
+//             onChange={handleAccordionChange('panel2')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">On-Prem</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="On-Prem" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={onPremInstanceDetails} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+
+//         {/* AWS + On-Prem Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel3'}
+//             onChange={handleAccordionChange('panel3')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">AWS + On-Prem</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="AWS + On-Prem" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+              
+//               {/* Tabs for AWS and On-Prem */}
+//               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+//                 <Tabs value={tabValue} onChange={handleTabChange} aria-label="aws-on-prem-tabs">
+//                   <Tab label="AWS" />
+//                   <Tab label="On-Prem" />
+//                 </Tabs>
+//               </Box>
+//               <Box sx={{ p: 3 }}>
+//                 {tabValue === 0 && (
+//                   <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsAWS} />
+//                 )}
+//                 {tabValue === 1 && (
+//                   <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsOnPrem} />
+//                 )}
+//               </Box>
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+//       </Grid>
+//     </div>
+//   );
+// }
+
+// export default OverviewAnalyticsView;
+
+// import React, { useState } from 'react';
+// import {
+//   Typography,
+//   Grid,
+//   Accordion,
+//   AccordionSummary,
+//   AccordionDetails,
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   Paper,
+//   Tabs,
+//   Tab,
+//   Box,
+// } from '@mui/material';
+// import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+// // Define a type for the cost data
+// type CostData = {
+//   name: string;
+//   compute: number;
+//   storage: number;
+//   network: number;
+//   total: number;
+// };
+
+// // Define a type for instance details
+// type InstanceDetails = {
+//   instanceName: string;
+//   computeRegion: string;
+//   storageRegion: string;
+//   storageGB: number;
+//   vCPUs: number;
+//   workloadName: string;
+// };
+
+// // Define a type for CSR Metrics data
+// type CSRMetrics = {
+//   instanceName: string;
+//   co2Emitted: number; // Total CO2 emitted per month in grams
+// };
+
+// // Dummy cost data
+// const costData: CostData[] = [
+//   { name: 'AWS', compute: 9658, storage: 156.85, network: 2898.3, total: 12713.15 },
+//   { name: 'On-Prem', compute: 8488, storage: 105.56, network: 1876, total: 8469.56 },
+//   { name: 'AWS + On-Prem', compute: 11000, storage: 300, network: 4000, total: 15300 },
+// ];
+
+// // Dummy instance details for AWS, On-Prem, and AWS + On-Prem with unique data
+// const awsInstanceDetails: InstanceDetails[] = [
+//   { instanceName: 'AWS Instance A', computeRegion: 'us-west-1', storageRegion: 'us-east-1', storageGB: 600, vCPUs: 8, workloadName: 'Marley ML' },
+//   { instanceName: 'AWS Instance B', computeRegion: 'eu-west-2', storageRegion: 'eu-central-1', storageGB: 300, vCPUs: 16, workloadName: 'Marley DL' },
+// ];
+
+// const onPremInstanceDetails: InstanceDetails[] = [
+//   { instanceName: 'On-Prem Instance A', computeRegion: 'Local-Region-1', storageRegion: 'Local-Region-2', storageGB: 750, vCPUs: 24, workloadName: 'Marley ML'  },
+//   { instanceName: 'On-Prem Instance B', computeRegion: 'Local-Region-3', storageRegion: 'Local-Region-4', storageGB: 900, vCPUs: 32, workloadName: 'Marley DL' },
+// ];
+
+// const awsOnPremInstanceDetailsAWS: InstanceDetails[] = [
+//   { instanceName: 'AWS+On-Prem AWS Instance A', computeRegion: 'us-east-2', storageRegion: 'us-west-1', storageGB: 1000, vCPUs: 64, workloadName: 'Marley ML' },
+// ];
+
+// const awsOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
+//   { instanceName: 'AWS+On-Prem On-Prem Instance A', computeRegion: 'Local-5', storageRegion: 'Local-6', storageGB: 1200, vCPUs: 48, workloadName: 'Marley DL' },
+// ];
+
+// // Dummy CSR Metrics data
+// const csrMetricsData: CSRMetrics[] = [
+//   { instanceName: 'AWS Instance A', co2Emitted: 4.024 },
+//   { instanceName: 'AWS Instance B', co2Emitted: 5.324 },
+//   { instanceName: 'On-Prem Instance A', co2Emitted: 4.097 },
+//   { instanceName: 'On-Prem Instance B', co2Emitted: 3.990 },
+//   { instanceName: 'AWS+On-Prem AWS Instance A', co2Emitted: 4.535 },
+//   { instanceName: 'AWS+On-Prem On-Prem Instance A', co2Emitted: 5.12 },
+// ];
+
+// // Table component that filters and displays cost data for a given provider
+// const CostDetailsTable: React.FC<{ provider: string }> = ({ provider }) => (
+//   <TableContainer component={Paper}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Provider</TableCell>
+//           <TableCell>Compute Cost</TableCell>
+//           <TableCell>Storage Cost</TableCell>
+//           <TableCell>Network Cost</TableCell>
+//           <TableCell>Total Cost</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {costData.filter((data) => data.name === provider).map((row) => (
+//           <TableRow key={row.name}>
+//             <TableCell>{row.name}</TableCell>
+//             <TableCell>{`$${row.compute}`}</TableCell>
+//             <TableCell>{`$${row.storage}`}</TableCell>
+//             <TableCell>{`$${row.network}`}</TableCell>
+//             <TableCell>{`$${row.total}`}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // InstanceDetailsTable that accepts dynamic instance data
+// const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ instanceDetails }) => (
+//   <TableContainer component={Paper} sx={{ mt: 3 }}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Instance Name</TableCell>
+//           <TableCell>Compute Region</TableCell>
+//           <TableCell>Storage Region</TableCell>
+//           <TableCell>Storage (GB)</TableCell>
+//           <TableCell>vCPUs</TableCell>
+//           <TableCell>Workload Number</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {instanceDetails.map((instance) => (
+//           <TableRow key={instance.instanceName}>
+//             <TableCell>{instance.instanceName}</TableCell>
+//             <TableCell>{instance.computeRegion}</TableCell>
+//             <TableCell>{instance.storageRegion}</TableCell>
+//             <TableCell>{instance.storageGB}</TableCell>
+//             <TableCell>{instance.vCPUs}</TableCell>
+//             <TableCell>{instance.workloadName}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // CSR Metrics Table component
+// const CSRDetailsTable: React.FC<{ instanceDetails: CSRMetrics[] }> = ({ instanceDetails }) => (
+//   <TableContainer component={Paper} sx={{ mt: 3 }}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Instance Name</TableCell>
+//           <TableCell>Total CO2 (g/month)</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {instanceDetails.map((csr) => (
+//           <TableRow key={csr.instanceName}>
+//             <TableCell>{csr.instanceName}</TableCell>
+//             <TableCell>{csr.co2Emitted}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // Main component for the output page
+// export function OverviewAnalyticsView() {
+//   const [expanded, setExpanded] = useState<string | false>(false);
+//   const [tabValue, setTabValue] = useState(0); // State to handle tab changes
+
+//   const handleAccordionChange = (panel: string) => (
+//     event: React.SyntheticEvent,
+//     isExpanded: boolean
+//   ) => {
+//     setExpanded(isExpanded ? panel : false);
+//   };
+
+//   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+//     setTabValue(newValue);
+//   };
+
+//   return (
+//     <div style={{ padding: '20px' }}>
+//       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+//         Cloud Provider Recommendations
+//       </Typography>
+
+//       <Grid container spacing={3}>
+//         {/* AWS Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel1'}
+//             onChange={handleAccordionChange('panel1')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">AWS</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="AWS" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={awsInstanceDetails} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 CSR Metrics
+//               </Typography>
+//               <CSRDetailsTable instanceDetails={csrMetricsData.filter((csr) =>
+//                 awsInstanceDetails.some((instance) => instance.instanceName === csr.instanceName)
+//               )} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+
+//         {/* On-Prem Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel2'}
+//             onChange={handleAccordionChange('panel2')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">On-Prem</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="On-Prem" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={onPremInstanceDetails} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 CSR Metrics
+//               </Typography>
+//               <CSRDetailsTable instanceDetails={csrMetricsData.filter((csr) =>
+//                 onPremInstanceDetails.some((instance) => instance.instanceName === csr.instanceName)
+//               )} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+
+//         {/* AWS + On-Prem Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel3'}
+//             onChange={handleAccordionChange('panel3')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">AWS + On-Prem</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="AWS + On-Prem" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details (AWS)
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsAWS} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details (On-Prem)
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsOnPrem} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 CSR Metrics
+//               </Typography>
+//               <CSRDetailsTable instanceDetails={csrMetricsData.filter((csr) =>
+//                 awsOnPremInstanceDetailsAWS.concat(awsOnPremInstanceDetailsOnPrem).some(
+//                   (instance) => instance.instanceName === csr.instanceName
+//                 )
+//               )} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+//       </Grid>
+//     </div>
+//   );
+// }
+
+
+// import React, { useState } from 'react';
+// import {
+//   Typography,
+//   Grid,
+//   Accordion,
+//   AccordionSummary,
+//   AccordionDetails,
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   Paper,
+//   Tabs,
+//   Tab,
+//   Box,
+// } from '@mui/material';
+// import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+// // Define a type for the cost data
+// type CostData = {
+//   name: string;
+//   compute: number;
+//   storage: number;
+//   network: number;
+//   total: number;
+// };
+
+// // Define a type for instance details
+// type InstanceDetails = {
+//   instanceName: string;
+//   computeRegion: string;
+//   storageRegion: string;
+//   storageGB: number;
+//   vCPUs: number;
+//   workloadName: string;
+// };
+
+// // Define a type for CSR metrics
+// type CSRMetrics = {
+//   instanceName: string;
+//   totalCO2: number; // Total CO2 in grams per month
+// };
+
+// // Define the props for the CostDetailsTable
+// interface CostDetailsTableProps {
+//   provider: string;
+// }
+
+// // Dummy cost data
+// const costData: CostData[] = [
+//   { name: 'AWS', compute: 9658, storage: 156.85, network: 2898.3, total: 12713.15 },
+//   { name: 'On-Prem', compute: 8488, storage: 105.56, network: 1876, total: 8469.56 },
+//   { name: 'AWS + On-Prem', compute: 11000, storage: 300, network: 4000, total: 15300 },
+// ];
+
+// // Dummy instance details for AWS, On-Prem, and AWS + On-Prem with unique data
+// const awsInstanceDetails: InstanceDetails[] = [
+//   { instanceName: 'AWS Instance A', computeRegion: 'us-west-1', storageRegion: 'us-east-1', storageGB: 600, vCPUs: 8, workloadName: 'Marley ML' },
+//   { instanceName: 'AWS Instance B', computeRegion: 'eu-west-2', storageRegion: 'eu-central-1', storageGB: 300, vCPUs: 16, workloadName: 'Marley DL' },
+// ];
+
+// const onPremInstanceDetails: InstanceDetails[] = [
+//   { instanceName: 'On-Prem Instance A', computeRegion: 'Local-Region-1', storageRegion: 'Local-Region-2', storageGB: 750, vCPUs: 24, workloadName: 'Marley ML'  },
+//   { instanceName: 'On-Prem Instance B', computeRegion: 'Local-Region-3', storageRegion: 'Local-Region-4', storageGB: 900, vCPUs: 32, workloadName: 'Marley DL' },
+// ];
+
+// const awsOnPremInstanceDetailsAWS: InstanceDetails[] = [
+//   { instanceName: 'AWS+On-Prem AWS Instance A', computeRegion: 'us-east-2', storageRegion: 'us-west-1', storageGB: 1000, vCPUs: 64, workloadName: 'Marley ML' },
+// ];
+
+// const awsOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
+//   { instanceName: 'AWS+On-Prem On-Prem Instance A', computeRegion: 'Local-5', storageRegion: 'Local-6', storageGB: 1200, vCPUs: 48, workloadName: 'Marley DL' },
+// ];
+
+// // Dummy CSR metrics data
+// const csrMetricsData: CSRMetrics[] = [
+//   { instanceName: 'AWS Instance A', totalCO2: 5000 },
+//   { instanceName: 'AWS Instance B', totalCO2: 3000 },
+//   { instanceName: 'On-Prem Instance A', totalCO2: 4000 },
+//   { instanceName: 'On-Prem Instance B', totalCO2: 3500 },
+//   { instanceName: 'AWS+On-Prem AWS Instance A', totalCO2: 6000 },
+//   { instanceName: 'AWS+On-Prem On-Prem Instance A', totalCO2: 4500 },
+// ];
+
+// // Table component that filters and displays cost data for a given provider
+// const CostDetailsTable: React.FC<CostDetailsTableProps> = ({ provider }) => (
+//   <TableContainer component={Paper}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Provider</TableCell>
+//           <TableCell>Compute Cost</TableCell>
+//           <TableCell>Storage Cost</TableCell>
+//           <TableCell>Network Cost</TableCell>
+//           <TableCell>Total Cost</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {costData.filter((data) => data.name === provider).map((row) => (
+//           <TableRow key={row.name}>
+//             <TableCell>{row.name}</TableCell>
+//             <TableCell>{`$${row.compute}`}</TableCell>
+//             <TableCell>{`$${row.storage}`}</TableCell>
+//             <TableCell>{`$${row.network}`}</TableCell>
+//             <TableCell>{`$${row.total}`}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // InstanceDetailsTable that accepts dynamic instance data
+// const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ instanceDetails }) => (
+//   <TableContainer component={Paper} sx={{ mt: 3 }}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Instance Name</TableCell>
+//           <TableCell>Compute Region</TableCell>
+//           <TableCell>Storage Region</TableCell>
+//           <TableCell>Storage (GB)</TableCell>
+//           <TableCell>vCPUs</TableCell>
+//           <TableCell>Workload Name</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {instanceDetails.map((instance) => (
+//           <TableRow key={instance.instanceName}>
+//             <TableCell>{instance.instanceName}</TableCell>
+//             <TableCell>{instance.computeRegion}</TableCell>
+//             <TableCell>{instance.storageRegion}</TableCell>
+//             <TableCell>{instance.storageGB}</TableCell>
+//             <TableCell>{instance.vCPUs}</TableCell>
+//             <TableCell>{instance.workloadName}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // CSR Metrics Table
+// const CSRMetricsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ instanceDetails }) => (
+//   <TableContainer component={Paper} sx={{ mt: 3 }}>
+//     <Table>
+//       <TableHead>
+//         <TableRow>
+//           <TableCell>Instance Name</TableCell>
+//           <TableCell>Total CO2 (g/month)</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {instanceDetails.map((instance) => {
+//           const csrData = csrMetricsData.find(csr => csr.instanceName === instance.instanceName);
+//           return (
+//             <TableRow key={instance.instanceName}>
+//               <TableCell>{instance.instanceName}</TableCell>
+//               <TableCell>{csrData ? csrData.totalCO2 : 'N/A'}</TableCell>
+//             </TableRow>
+//           );
+//         })}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
+// // Main component for the output page
+// export function OverviewAnalyticsView() {
+//   const [expanded, setExpanded] = useState<string | false>(false);
+//   const [tabValue, setTabValue] = useState(0); // State to handle tab changes
+
+//   const handleAccordionChange = (panel: string) => (
+//     event: React.SyntheticEvent,
+//     isExpanded: boolean
+//   ) => {
+//     setExpanded(isExpanded ? panel : false);
+//   };
+
+//   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+//     setTabValue(newValue);
+//   };
+
+//   return (
+//     <div style={{ padding: '20px' }}>
+//       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+//         Cloud Provider Recommendations
+//       </Typography>
+
+//       <Grid container spacing={3}>
+//         {/* AWS Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel1'}
+//             onChange={handleAccordionChange('panel1')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">AWS</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="AWS" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={awsInstanceDetails} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 CSR Metrics
+//               </Typography>
+//               <CSRMetricsTable instanceDetails={awsInstanceDetails} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+
+//         {/* On-Prem Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel2'}
+//             onChange={handleAccordionChange('panel2')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">On-Prem</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="On-Prem" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={onPremInstanceDetails} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 CSR Metrics
+//               </Typography>
+//               <CSRMetricsTable instanceDetails={onPremInstanceDetails} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+
+//         {/* AWS + On-Prem Section */}
+//         <Grid item xs={12}>
+//           <Accordion
+//             expanded={expanded === 'panel3'}
+//             onChange={handleAccordionChange('panel3')}
+//           >
+//             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+//               <Typography variant="h6">AWS + On-Prem</Typography>
+//             </AccordionSummary>
+//             <AccordionDetails>
+//               <Typography variant="subtitle1">Cost Details</Typography>
+//               <CostDetailsTable provider="AWS + On-Prem" />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details (AWS)
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsAWS} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 CSR Metrics
+//               </Typography>
+//               <CSRMetricsTable instanceDetails={awsOnPremInstanceDetailsAWS} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 Instance Details (On-Prem)
+//               </Typography>
+//               <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsOnPrem} />
+//               <Typography variant="subtitle1" sx={{ mt: 2 }}>
+//                 CSR Metrics
+//               </Typography>
+//               <CSRMetricsTable instanceDetails={awsOnPremInstanceDetailsOnPrem} />
+//             </AccordionDetails>
+//           </Accordion>
+//         </Grid>
+//       </Grid>
+//     </div>
+//   );
+// }
+
+
+
 import React, { useState } from 'react';
 import {
   Typography,
@@ -913,7 +1698,6 @@ import {
   Paper,
   Tabs,
   Tab,
-  Box,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -922,7 +1706,6 @@ type CostData = {
   name: string;
   compute: number;
   storage: number;
-  network: number;
   total: number;
 };
 
@@ -936,6 +1719,12 @@ type InstanceDetails = {
   workloadName: string;
 };
 
+// Define a type for CSR metrics
+type CSRMetrics = {
+  instanceName: string;
+  totalCO2: number; // Total CO2 in grams per month
+};
+
 // Define the props for the CostDetailsTable
 interface CostDetailsTableProps {
   provider: string;
@@ -943,9 +1732,9 @@ interface CostDetailsTableProps {
 
 // Dummy cost data
 const costData: CostData[] = [
-  { name: 'AWS', compute: 9658, storage: 156.85, network: 2898.3, total: 12713.15 },
-  { name: 'On-Prem', compute: 8488, storage: 105.56, network: 1876, total: 8469.56 },
-  { name: 'AWS + On-Prem', compute: 11000, storage: 300, network: 4000, total: 15300 },
+  { name: 'AWS', compute: 9658, storage: 156.85, total: 9814.85 },
+  { name: 'On-Prem', compute: 8488, storage: 105.56, total: 8593.56 },
+  { name: 'AWS + On-Prem', compute: 11000, storage: 300, total: 11300 },
 ];
 
 // Dummy instance details for AWS, On-Prem, and AWS + On-Prem with unique data
@@ -961,12 +1750,20 @@ const onPremInstanceDetails: InstanceDetails[] = [
 
 const awsOnPremInstanceDetailsAWS: InstanceDetails[] = [
   { instanceName: 'AWS+On-Prem AWS Instance A', computeRegion: 'us-east-2', storageRegion: 'us-west-1', storageGB: 1000, vCPUs: 64, workloadName: 'Marley ML' },
-  // { instanceName: 'AWS+On-Prem AWS Instance B', computeRegion: 'us-east-1', storageRegion: 'us-west-2', storageGB: 800, vCPUs: 32, workloadName: 'Marley DL' },
 ];
 
 const awsOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
   { instanceName: 'AWS+On-Prem On-Prem Instance A', computeRegion: 'Local-5', storageRegion: 'Local-6', storageGB: 1200, vCPUs: 48, workloadName: 'Marley DL' },
-  // { instanceName: 'AWS+On-Prem On-Prem Instance B', computeRegion: 'Local-7', storageRegion: 'Local-8', storageGB: 1500, vCPUs: 56, workloadName: 402 },
+];
+
+// Dummy CSR metrics data
+const csrMetricsData: CSRMetrics[] = [
+  { instanceName: 'AWS Instance A', totalCO2: 4.041 },
+  { instanceName: 'AWS Instance B', totalCO2: 3.040 },
+  { instanceName: 'On-Prem Instance A', totalCO2: 4.091 },
+  { instanceName: 'On-Prem Instance B', totalCO2: 3.908 },
+  { instanceName: 'AWS+On-Prem AWS Instance A', totalCO2: 5.403 },
+  { instanceName: 'AWS+On-Prem On-Prem Instance A', totalCO2: 3.001 },
 ];
 
 // Table component that filters and displays cost data for a given provider
@@ -978,7 +1775,6 @@ const CostDetailsTable: React.FC<CostDetailsTableProps> = ({ provider }) => (
           <TableCell>Provider</TableCell>
           <TableCell>Compute Cost</TableCell>
           <TableCell>Storage Cost</TableCell>
-          <TableCell>Network Cost</TableCell>
           <TableCell>Total Cost</TableCell>
         </TableRow>
       </TableHead>
@@ -988,7 +1784,6 @@ const CostDetailsTable: React.FC<CostDetailsTableProps> = ({ provider }) => (
             <TableCell>{row.name}</TableCell>
             <TableCell>{`$${row.compute}`}</TableCell>
             <TableCell>{`$${row.storage}`}</TableCell>
-            <TableCell>{`$${row.network}`}</TableCell>
             <TableCell>{`$${row.total}`}</TableCell>
           </TableRow>
         ))}
@@ -1008,7 +1803,7 @@ const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = (
           <TableCell>Storage Region</TableCell>
           <TableCell>Storage (GB)</TableCell>
           <TableCell>vCPUs</TableCell>
-          <TableCell>Workload Number</TableCell>
+          <TableCell>Workload Name</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -1027,6 +1822,31 @@ const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = (
   </TableContainer>
 );
 
+// CSR Metrics Table
+const CSRMetricsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ instanceDetails }) => (
+  <TableContainer component={Paper} sx={{ mt: 3 }}>
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>Instance Name</TableCell>
+          <TableCell>Total CO2 (g/month)</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {instanceDetails.map((instance) => {
+          const csrData = csrMetricsData.find(csr => csr.instanceName === instance.instanceName);
+          return (
+            <TableRow key={instance.instanceName}>
+              <TableCell>{instance.instanceName}</TableCell>
+              <TableCell>{csrData ? csrData.totalCO2 : 'N/A'}</TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  </TableContainer>
+);
+
 // Main component for the output page
 export function OverviewAnalyticsView() {
   const [expanded, setExpanded] = useState<string | false>(false);
@@ -1037,6 +1857,9 @@ export function OverviewAnalyticsView() {
     isExpanded: boolean
   ) => {
     setExpanded(isExpanded ? panel : false);
+    if (!isExpanded) {
+      setTabValue(0); // Reset to AWS tab when collapsed
+    }
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -1066,6 +1889,10 @@ export function OverviewAnalyticsView() {
                 Instance Details
               </Typography>
               <InstanceDetailsTable instanceDetails={awsInstanceDetails} />
+              <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                CSR Metrics
+              </Typography>
+              <CSRMetricsTable instanceDetails={awsInstanceDetails} />
             </AccordionDetails>
           </Accordion>
         </Grid>
@@ -1086,6 +1913,10 @@ export function OverviewAnalyticsView() {
                 Instance Details
               </Typography>
               <InstanceDetailsTable instanceDetails={onPremInstanceDetails} />
+              <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                CSR Metrics
+              </Typography>
+              <CSRMetricsTable instanceDetails={onPremInstanceDetails} />
             </AccordionDetails>
           </Accordion>
         </Grid>
@@ -1102,25 +1933,38 @@ export function OverviewAnalyticsView() {
             <AccordionDetails>
               <Typography variant="subtitle1">Cost Details</Typography>
               <CostDetailsTable provider="AWS + On-Prem" />
-              <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                Instance Details
-              </Typography>
               
-              {/* Tabs for AWS and On-Prem */}
-              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={tabValue} onChange={handleTabChange} aria-label="aws-on-prem-tabs">
-                  <Tab label="AWS" />
-                  <Tab label="On-Prem" />
-                </Tabs>
-              </Box>
-              <Box sx={{ p: 3 }}>
-                {tabValue === 0 && (
+              {/* Tabs for AWS and On-Prem instance details */}
+              <Tabs value={tabValue} onChange={handleTabChange} sx={{ mt: 2 }}>
+                <Tab label="AWS" />
+                <Tab label="On-Prem" />
+              </Tabs>
+
+              {/* Tab content */}
+              {tabValue === 0 && (
+                <>
+                  <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                    Instance Details (AWS)
+                  </Typography>
                   <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsAWS} />
-                )}
-                {tabValue === 1 && (
+                  <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                    CSR Metrics
+                  </Typography>
+                  <CSRMetricsTable instanceDetails={awsOnPremInstanceDetailsAWS} />
+                </>
+              )}
+              {tabValue === 1 && (
+                <>
+                  <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                    Instance Details (On-Prem)
+                  </Typography>
                   <InstanceDetailsTable instanceDetails={awsOnPremInstanceDetailsOnPrem} />
-                )}
-              </Box>
+                  <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                    CSR Metrics
+                  </Typography>
+                  <CSRMetricsTable instanceDetails={awsOnPremInstanceDetailsOnPrem} />
+                </>
+              )}
             </AccordionDetails>
           </Accordion>
         </Grid>
@@ -1128,5 +1972,3 @@ export function OverviewAnalyticsView() {
     </div>
   );
 }
-
-export default OverviewAnalyticsView;
