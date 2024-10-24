@@ -64,6 +64,9 @@ const costData: CostData[] = [
   { name: 'AWS', compute: 9658, storage: 156.85, total: 9814.85 },
   { name: 'On-Prem', compute: 8488, storage: 105.56, total: 8593.56 },
   { name: 'AWS + On-Prem', compute: 11000, storage: 300, total: 11300 },
+  { name: 'AWS', compute: 9658, storage: 156.85, total: 9814.85 },
+  { name: 'On-Prem', compute: 8488, storage: 105.56, total: 8593.56 },
+  { name: 'AWS + On-Prem', compute: 11000, storage: 300, total: 11300 },
 ];
 
 // Dummy instance details for AWS, On-Prem, and AWS + On-Prem with unique data
@@ -180,6 +183,7 @@ const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = (
           <TableCell>Storage Region</TableCell>
           <TableCell>Storage (GB)</TableCell>
           <TableCell>vCPUs</TableCell>
+          <TableCell>Workload Name</TableCell>
           <TableCell>Workload Name</TableCell>
         </TableRow>
       </TableHead>
