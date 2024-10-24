@@ -10,7 +10,6 @@ import {
   Button,
   Card,
   Grid,
-  Slider,
   Stepper,
   Step,
   StepButton,
