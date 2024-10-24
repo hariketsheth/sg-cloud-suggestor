@@ -391,8 +391,8 @@ const calculateTotalEmissions = (instanceData: CSRMetrics[]) => {
   return totals;
 };
 
-const calculateProjectedCosts = (costData: CostData[], years: number) =>
-  costData.map((data) => ({
+const calculateProjectedCosts = (costData1: CostData[], years: number) =>
+  costData1.map((data) => ({
     name: data.name,
     projectedTotal: data.total * 1.1 ** (years - 1), // 10% growth rate for total cost
   }));
