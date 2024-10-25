@@ -425,6 +425,16 @@ export function ProcessView() {
                 </FormControl>
                 <TextField
                   fullWidth
+                  name="storagePerformance"
+                  label="vCPU"
+                  type="number"
+                  value={workload.formData.storagePerformance}
+                  onChange={(e) => handleChange(workload.id, e)}
+                  sx={{ mb: 3 }}
+                  required
+                />
+                <TextField
+                  fullWidth
                   name="storageSize"
                   label="Size (GB)"
                   type="number"
@@ -433,16 +443,7 @@ export function ProcessView() {
                   sx={{ mb: 3 }}
                   required
                 />
-                <TextField
-                  fullWidth
-                  name="storagePerformance"
-                  label="Performance"
-                  type="number"
-                  value={workload.formData.storagePerformance}
-                  onChange={(e) => handleChange(workload.id, e)}
-                  sx={{ mb: 3 }}
-                  required
-                />
+          
                 <FormControl component="fieldset" sx={{ mb: 3 }} required>
                   <FormLabel component="legend">Latency Sensitivity</FormLabel>
                   <ToggleButtonGroup

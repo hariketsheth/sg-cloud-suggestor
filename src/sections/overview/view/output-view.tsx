@@ -84,7 +84,7 @@ const awsInstanceDetails: InstanceDetails[] = [
     storageRegion: '-',
     storageGB: 32,
     vCPUs: 4,
-    workloadName: 'Marley ML',
+    workloadName: 'SG Web App',
   },
   {
     instanceName: 'sb.m5.large',
@@ -92,7 +92,7 @@ const awsInstanceDetails: InstanceDetails[] = [
     storageRegion: 'Europe',
     storageGB: 8,
     vCPUs: 2,
-    workloadName: 'Marley DL',
+    workloadName: 'SG Storage',
   },
 ];
 
@@ -103,7 +103,7 @@ const azureInstanceDetails: InstanceDetails[] = [
     storageRegion: '-',
     storageGB: 32,
     vCPUs: 4,
-    workloadName: 'Marley ML',
+    workloadName: 'SG Web App',
     totalCO2: 7.5,
   },
   {
@@ -112,7 +112,7 @@ const azureInstanceDetails: InstanceDetails[] = [
     storageRegion: 'Europe',
     storageGB: 8,
     vCPUs: 2,
-    workloadName: 'Marley DL',
+    workloadName: 'SG Storage',
     totalCO2: 4.0,
   },
 ];
@@ -124,7 +124,7 @@ const onPremInstanceDetails: InstanceDetails[] = [
     storageRegion: '-',
     storageGB: 32,
     vCPUs: 4,
-    workloadName: 'Marley ML',
+    workloadName: 'SG Web App',
   },
   {
     instanceName: 'Postgres-OCS-2vCPU-8GB',
@@ -132,7 +132,7 @@ const onPremInstanceDetails: InstanceDetails[] = [
     storageRegion: 'eu-fr-north-1',
     storageGB: 8,
     vCPUs: 2,
-    workloadName: 'Marley DL',
+    workloadName: 'SG Storage',
   },
 ];
 
@@ -143,7 +143,7 @@ const awsOnPremInstanceDetailsAWS: InstanceDetails[] = [
     storageRegion: '-',
     storageGB: 32,
     vCPUs: 4,
-    workloadName: 'Marley ML',
+    workloadName: 'SG Web App',
   },
 ];
 
@@ -154,7 +154,7 @@ const awsOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
     storageRegion: 'Europe',
     storageGB: 8,
     vCPUs: 2,
-    workloadName: 'Marley DL',
+    workloadName: 'SG Storage',
   },
 ];
 
@@ -165,7 +165,7 @@ const azureOnPremInstanceDetailsAzure: InstanceDetails[] = [
     storageRegion: '-',
     storageGB: 32,
     vCPUs: 4,
-    workloadName: 'Marley ML',
+    workloadName: 'SG Web App',
   },
 ];
 
@@ -176,7 +176,7 @@ const azureOnPremInstanceDetailsOnPrem: InstanceDetails[] = [
     storageRegion: 'eu-fr-north-1',
     storageGB: 8,
     vCPUs: 2,
-    workloadName: 'Marley DL',
+    workloadName: 'SG Storage',
   },
 ];
 
@@ -187,7 +187,7 @@ const awsAzureInstanceDetailsAWS: InstanceDetails[] = [
     storageRegion: '-',
     storageGB: 32,
     vCPUs: 4,
-    workloadName: 'Marley ML',
+    workloadName: 'SG Web App',
   },
 ];
 
@@ -198,7 +198,7 @@ const awsAzureInstanceDetailsAzure: InstanceDetails[] = [
     storageRegion: 'Europe',
     storageGB: 8,
     vCPUs: 2,
-    workloadName: 'Marley DL',
+    workloadName: 'SG Storage',
   },
 ];
 
@@ -209,7 +209,7 @@ const multiCloudInstanceDetails: InstanceDetails[] = [
     storageRegion: '-',
     storageGB: 32,
     vCPUs: 4,
-    workloadName: 'Marley ML',
+    workloadName: 'SG Web App',
   },
   {
     instanceName: 'Standard D2s v5 MC',
@@ -217,7 +217,7 @@ const multiCloudInstanceDetails: InstanceDetails[] = [
     storageRegion: 'Europe',
     storageGB: 8,
     vCPUs: 2,
-    workloadName: 'Marley DL',
+    workloadName: 'SG Storage',
   },
 ];
 
