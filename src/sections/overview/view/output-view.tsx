@@ -881,17 +881,17 @@ const selectedProviderData = combinedData.find((data) => data.name === selectedP
                       text: 'Total CO2 (kg/month)',
                     },
                     labels: {
-                      formatter: (value: number) => `${value.toFixed(2)} g`,
+                      formatter: (value: number) => `${value.toFixed(2)} kg`,
                     },
                   },
                   tooltip: {
                     y: {
-                      formatter: (value: number) => `${value.toFixed(2)} g`,
+                      formatter: (value: number) => `${value.toFixed(2)} kg`,
                     },
                   },
                   dataLabels: {
                     enabled: true, // Enable data labels
-                    formatter: (value: number) => `${value.toFixed(2)} g`, // Format data labels
+                    formatter: (value: number) => `${value.toFixed(2)} kg`, // Format data labels
                   },
                 }}
                 height={364}
