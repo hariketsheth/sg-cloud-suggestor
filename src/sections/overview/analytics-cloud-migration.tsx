@@ -59,6 +59,16 @@ export function AnalyticsCloudMigration({
     },
     ...chart.options,
   });
+  const handleDownload = ( cloudProvider1: any ) => {
+     const filePath = `/assets/files/${cloudProvider1}.tf`;
+      const link = document.createElement('a');
+      link.href = filePath;
+      link.download = `${cloudProvider1}.tf`;
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+  };
 
   return (
     <Card
@@ -100,23 +110,24 @@ export function AnalyticsCloudMigration({
           justifyContent: 'space-between',
         }}
       >
-<Box sx={{ flexGrow: 1, minWidth: 122 }}>
-  <Box sx={{ mb: 1, typography: 'h5' }}>{cloudProvider}</Box>
-  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-    <Button
-      variant="contained"
-      sx={{
-        backgroundColor: '#FFA500', // Gold color
-        color: 'white',
-        '&:hover': {
-          backgroundColor:  `${color}.darker`, // Orange color
-        },
-      }}
-    >
-      Generate
-    </Button>
-  </Box>
-</Box>
+    <Box sx={{ flexGrow: 1, minWidth: 122 }}>
+      <Box sx={{ mb: 1, typography: 'h5' }}>Terraform Script Generator</Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <Button
+          variant="contained"
+          onClick={() => handleDownload(cloudProvider)}
+          sx={{
+            backgroundColor: '#FFA500', // Gold color
+            color: 'white',
+            '&:hover': {
+              backgroundColor:  `${color}.darker`, // Orange color
+            },
+          }}
+        >
+          Generate
+        </Button>
+      </Box>
+    </Box>
 
         <Chart
           type="line"

@@ -313,7 +313,7 @@ const CSRMetricsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ ins
       <TableHead>
         <TableRow>
           <TableCell>Instance Name</TableCell>
-          <TableCell>Total CO<sub>2</sub> (g/month)</TableCell>
+          <TableCell>Total CO<sub>2</sub> (kg/month)</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -429,7 +429,7 @@ export function OutputView() {
   const lineChartData = {
     series: [
       {
-        name: 'Carbon Emissions by Provider (kg/month)',
+        name: 'Carbon Emissions by Provider (kkg/month)',
         data: [
           totalEmissions.AWS, // Total AWS emissions
           totalEmissions['On-Prem'], // Total On-Prem emissions
@@ -537,7 +537,7 @@ const selectedProviderData = combinedData.find((data) => data.name === selectedP
             <AnalyticsCloudMigration
               title="Current Cloud Provider Suggestion"
               subTitle="☁️ Cloud Migration help"
-              cloudProvider="Terraform Script Generator"
+              cloudProvider={selectedProvider}
               color="warning"
               icon={<img alt="icon" src="/assets/icons/glass/ic-glass-terraform.svg" />}
               chart={{
@@ -878,7 +878,7 @@ const selectedProviderData = combinedData.find((data) => data.name === selectedP
                   },
                   yaxis: {
                     title: {
-                      text: 'Total CO2 (g/month)',
+                      text: 'Total CO2 (kg/month)',
                     },
                     labels: {
                       formatter: (value: number) => `${value.toFixed(2)} g`,
@@ -913,7 +913,7 @@ const selectedProviderData = combinedData.find((data) => data.name === selectedP
                 <TableCell>Compute Cost</TableCell>
                 <TableCell>Storage Cost</TableCell>
                 <TableCell>Total Cost</TableCell>
-                <TableCell>Total CO2 (g/month)</TableCell>
+                <TableCell>Total CO2 (kg/month)</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

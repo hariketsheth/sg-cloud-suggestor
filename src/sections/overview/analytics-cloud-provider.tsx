@@ -109,7 +109,7 @@ export function AnalyticsCloudProvider({
           <Box sx={{ mb: 1, typography: 'h5' }}>{cloudProvider}</Box>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Box sx={{ typography: 'subtitle2', mr: 2 }}>CSR:</Box>
-            <Box sx={{ typography: 'h6', mr: 4 }}>{fShortenNumber(csrMetrics)} g/month</Box>
+            <Box sx={{ typography: 'h6', mr: 4 }}>{fShortenNumber(csrMetrics)} kg/month</Box>
             <Box sx={{ typography: 'subtitle2', mr: 2 }}>Cost:</Box>
             <Box sx={{ typography: 'h6' }}>$ {fShortenNumber(cost)}</Box>
           </Box>

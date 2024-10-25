@@ -306,7 +306,7 @@ const CSRMetricsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ ins
       <TableHead>
         <TableRow>
           <TableCell>Instance Name</TableCell>
-          <TableCell>Total CO2 (g/month)</TableCell>
+          <TableCell>Total CO2 (kg/month)</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -413,7 +413,7 @@ export function OverviewAnalyticsView() {
   const lineChartData = {
     series: [
       {
-        name: 'Carbon Emissions by Provider (kg/month)',
+        name: 'Carbon Emissions by Provider (kkg/month)',
         data: [
           totalEmissions.AWS, // Total AWS emissions
           totalEmissions['On-Prem'], // Total On-Prem emissions
@@ -821,7 +821,7 @@ export function OverviewAnalyticsView() {
                   },
                   yaxis: {
                     title: {
-                      text: 'Total CO2 (g/month)',
+                      text: 'Total CO2 (kg/month)',
                     },
                     labels: {
                       formatter: (value: number) => `${value.toFixed(2)} g`,
@@ -856,7 +856,7 @@ export function OverviewAnalyticsView() {
                 <TableCell>Compute Cost</TableCell>
                 <TableCell>Storage Cost</TableCell>
                 <TableCell>Total Cost</TableCell>
-                <TableCell>Total CO2 (g/month)</TableCell>
+                <TableCell>Total CO2 (kg/month)</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
