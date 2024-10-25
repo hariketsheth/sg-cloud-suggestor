@@ -21,17 +21,11 @@ type Props = CardProps & {
   color?: ColorType;
   subTitle?: string;
   icon: React.ReactNode;
-  chart: {
-    series: number[];
-    categories: string[];
-    options?: ChartOptions;
-  };
 };
 
 export function AnalyticsCloudMigration({
   icon,
   title,
-  chart,
   cloudProvider,
   subTitle,
   color = 'primary',
@@ -42,23 +36,7 @@ export function AnalyticsCloudMigration({
 
   const chartColors = [theme.palette[color].dark];
 
-  const chartOptions = useChart({
-    chart: { sparkline: { enabled: true } },
-    colors: chartColors,
-    xaxis: { categories: chart.categories },
-    grid: {
-      padding: {
-        top: 6,
-        left: 6,
-        right: 6,
-        bottom: 6,
-      },
-    },
-    tooltip: {
-      y: { formatter: (value: number) => fNumber(value), title: { formatter: () => '' } },
-    },
-    ...chart.options,
-  });
+ 
   const handleDownload = ( cloudProvider1: any ) => {
      const filePath = `/assets/files/${cloudProvider1}.tf`;
       const link = document.createElement('a');
@@ -129,13 +107,7 @@ export function AnalyticsCloudMigration({
       </Box>
     </Box>
 
-        <Chart
-          type="line"
-          series={[{ data: chart.series }]}
-          options={chartOptions}
-          width={84}
-          height={56}
-        />
+       
       </Box>
 
       <SvgColor

@@ -235,8 +235,8 @@ const csrMetricsData: any = [
   { instanceName: 'db.m5.large AA', cloud: 'AWS + Azure', totalCO2: 8.0 },
   { instanceName: 'large-mem32 AP', cloud: 'Azure + On-Prem', totalCO2: 7.3 },
   { instanceName: 'Postgres-OCS-2vCPU-8GB AP', cloud: 'Azure + On-Prem', totalCO2: 5.8 },
-  { instanceName: 'Standard D4s v5 MC', cloud: 'Multi Cloud',totalCO2: 7.5 },
-  { instanceName: 'Standard D2s v5 MC', cloud: 'Multi Cloud',totalCO2: 4.0 },
+  { instanceName: 'Standard D4s v5 MC', cloud: 'Multi Cloud', totalCO2: 7.5 },
+  { instanceName: 'Standard D2s v5 MC', cloud: 'Multi Cloud', totalCO2: 4.0 },
 ];
 
 // Table component that filters and displays cost data for a given provider
@@ -293,12 +293,10 @@ const InstanceDetailsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = (
             <TableCell>{instance.storageGB}</TableCell>
             <TableCell>{instance.vCPUs}</TableCell>
             <TableCell>{instance.workloadName}</TableCell>
-            <TableCell> <Chip
-                          label="GDPR Compliant"
-                          sx={{ ml: 1 }}
-                          size="small"
-                          color="success"
-                        /></TableCell>
+            <TableCell>
+              {' '}
+              <Chip label="GDPR Compliant" sx={{ ml: 1 }} size="small" color="success" />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -313,12 +311,16 @@ const CSRMetricsTable: React.FC<{ instanceDetails: InstanceDetails[] }> = ({ ins
       <TableHead>
         <TableRow>
           <TableCell>Instance Name</TableCell>
-          <TableCell>Total CO<sub>2</sub> (kg/month)</TableCell>
+          <TableCell>
+            Total CO<sub>2</sub> (kg/month)
+          </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
         {instanceDetails.map((instance) => {
-          const csrData = csrMetricsData.find((csr: any) => csr.instanceName === instance.instanceName);
+          const csrData = csrMetricsData.find(
+            (csr: any) => csr.instanceName === instance.instanceName
+          );
           return (
             <TableRow key={instance.instanceName}>
               <TableCell>{instance.instanceName}</TableCell>
@@ -348,14 +350,14 @@ const csr1MetricsData: CSRMetrics[] = [
 ];
 
 const csr2MetricsData: CSRMetrics[] = [
-    { instanceName: 'AWS', totalCO2: 20.0 },
-    { instanceName: 'On-Prem', totalCO2: 13.1 },
-    { instanceName: 'Azure', totalCO2: 11.5 },
-    { instanceName: 'AWS + On-Prem', totalCO2: 14.8 },
-    { instanceName: 'AWS + Azure', totalCO2: 23.0 },
-    { instanceName: 'Azure + On-Prem', totalCO2: 13.1 },
-    { instanceName: 'Multi Cloud', totalCO2: 11.45 },
-  ];
+  { instanceName: 'AWS', totalCO2: 20.0 },
+  { instanceName: 'On-Prem', totalCO2: 13.1 },
+  { instanceName: 'Azure', totalCO2: 11.5 },
+  { instanceName: 'AWS + On-Prem', totalCO2: 14.8 },
+  { instanceName: 'AWS + Azure', totalCO2: 23.0 },
+  { instanceName: 'Azure + On-Prem', totalCO2: 13.1 },
+  { instanceName: 'Multi Cloud', totalCO2: 11.45 },
+];
 const calculateTotalEmissions = (instanceData: CSRMetrics[]) => {
   const totals = {
     AWS: 0,
@@ -475,38 +477,42 @@ export function OutputView() {
       cost: costData.find((data) => data.name === 'AWS')?.total || 0,
       csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'AWS')?.totalCO2 || 0,
     },
-  {
-    name: 'Azure',
-    cost: costData.find((data) => data.name === 'Azure')?.total || 0,
-    csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'Azure')?.totalCO2 || 0,
-  },
-  {
-    name: 'On-Prem',
-    cost: costData.find((data) => data.name === 'On-Prem')?.total || 0,
-    csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'On-Prem')?.totalCO2 || 0,
-  },
-  {
-    name: 'AWS + On-Prem',
-    cost: costData.find((data) => data.name === 'AWS + On-Prem')?.total || 0,
-    csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'AWS + On-Prem')?.totalCO2 || 0,
-  },
-  {
-    name: 'AWS + Azure',
-    cost: costData.find((data) => data.name === 'AWS + Azure')?.total || 0,
-    csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'AWS + Azure')?.totalCO2 || 0,
-  },
-  {
-    name: 'Azure + On-Prem',
-    cost: costData.find((data) => data.name === 'Azure + On-Prem')?.total || 0,
-    csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'Azure + On-Prem')?.totalCO2 || 0,
-  },
-  {
-    name: 'Multi Cloud',
-    cost: costData.find((data) => data.name === 'Multi Cloud')?.total || 0,
-    csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'Multi Cloud')?.totalCO2 || 0,
-  },
-];
-const selectedProviderData = combinedData.find((data) => data.name === selectedProvider) || {
+    {
+      name: 'Azure',
+      cost: costData.find((data) => data.name === 'Azure')?.total || 0,
+      csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'Azure')?.totalCO2 || 0,
+    },
+    {
+      name: 'On-Prem',
+      cost: costData.find((data) => data.name === 'On-Prem')?.total || 0,
+      csrMetrics: csr2MetricsData.find((data) => data.instanceName === 'On-Prem')?.totalCO2 || 0,
+    },
+    {
+      name: 'AWS + On-Prem',
+      cost: costData.find((data) => data.name === 'AWS + On-Prem')?.total || 0,
+      csrMetrics:
+        csr2MetricsData.find((data) => data.instanceName === 'AWS + On-Prem')?.totalCO2 || 0,
+    },
+    {
+      name: 'AWS + Azure',
+      cost: costData.find((data) => data.name === 'AWS + Azure')?.total || 0,
+      csrMetrics:
+        csr2MetricsData.find((data) => data.instanceName === 'AWS + Azure')?.totalCO2 || 0,
+    },
+    {
+      name: 'Azure + On-Prem',
+      cost: costData.find((data) => data.name === 'Azure + On-Prem')?.total || 0,
+      csrMetrics:
+        csr2MetricsData.find((data) => data.instanceName === 'Azure + On-Prem')?.totalCO2 || 0,
+    },
+    {
+      name: 'Multi Cloud',
+      cost: costData.find((data) => data.name === 'Multi Cloud')?.total || 0,
+      csrMetrics:
+        csr2MetricsData.find((data) => data.instanceName === 'Multi Cloud')?.totalCO2 || 0,
+    },
+  ];
+  const selectedProviderData = combinedData.find((data) => data.name === selectedProvider) || {
     cost: 0,
     csrMetrics: 0,
   };
@@ -519,19 +525,19 @@ const selectedProviderData = combinedData.find((data) => data.name === selectedP
 
         <Grid container spacing={6}>
           <Grid xs={6}>
-  <AnalyticsCloudProvider
-    title="Current Cloud Provider Suggestion"
-    bestProvider={selectedProvider === bestCloudProvider}
-    csrMetrics={selectedProviderData.csrMetrics}
-    cloudProvider={selectedProvider}
-    cost={selectedProviderData.cost}
-    color="error"
-    icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
-    chart={{
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-      series: [56, 30, 23, 54, 47, 40, 62, 73],
-    }}
-  />
+            <AnalyticsCloudProvider
+              title="Current Cloud Provider Suggestion"
+              bestProvider={selectedProvider === bestCloudProvider}
+              csrMetrics={selectedProviderData.csrMetrics}
+              cloudProvider={selectedProvider}
+              cost={selectedProviderData.cost}
+              color="error"
+              icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
+              chart={{
+                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                series: [56, 30, 23, 54, 47, 40, 62, 73],
+              }}
+            />
           </Grid>
           <Grid xs={6}>
             <AnalyticsCloudMigration
@@ -540,10 +546,6 @@ const selectedProviderData = combinedData.find((data) => data.name === selectedP
               cloudProvider={selectedProvider}
               color="warning"
               icon={<img alt="icon" src="/assets/icons/glass/ic-glass-terraform.svg" />}
-              chart={{
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-                series: [56, 30, 23, 54, 47, 40, 62, 73],
-              }}
             />
           </Grid>
         </Grid>
@@ -918,10 +920,12 @@ const selectedProviderData = combinedData.find((data) => data.name === selectedP
             </TableHead>
             <TableBody>
               {costData.map((row) => {
-                const csrData = csr2MetricsData.find((csr: any) => csr.instanceName.includes(row.name));
+                const csrData = csr2MetricsData.find((csr: any) =>
+                  csr.instanceName.includes(row.name)
+                );
                 const isBestProvider = row.name === bestCloudProvider;
                 const isCostBetter = bestProviderData && row.total < bestProviderData.total;
-                
+
                 const isCO2Better =
                   bestProviderCO2 && csrData && csrData.totalCO2 < bestProviderCO2;
 
