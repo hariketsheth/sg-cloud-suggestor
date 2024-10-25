@@ -320,7 +320,7 @@ export function ProcessView() {
   };
 
   const handleSubmit = useCallback(() => {
-    router.push('/');
+    router.push('/output');
   }, [router]);
 
   const handleAccordionChange = (id: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
