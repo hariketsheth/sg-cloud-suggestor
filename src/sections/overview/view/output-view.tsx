@@ -378,26 +378,26 @@ const calculateTotalEmissions = (instanceData: CSRMetrics[]) => {
       totals.Azure += data.totalCO2;
     }
     if (
-      data.instanceName === 'AWS+On-Prem AWS Instance A' ||
-      data.instanceName === 'AWS+On-Prem On-Prem Instance A'
+      data.instanceName === 'AWS + On-Prem AWS Instance A' ||
+      data.instanceName === 'AWS + On-Prem On-Prem Instance A'
     ) {
       totals['AWS + On-Prem'] += data.totalCO2;
     }
     if (
-      data.instanceName === 'AWS+Azure AWS Instance A' ||
-      data.instanceName === 'AWS+Azure Azure Instance B'
+      data.instanceName === 'AWS + Azure AWS Instance A' ||
+      data.instanceName === 'AWS + Azure Azure Instance B'
     ) {
       totals['AWS + Azure'] += data.totalCO2;
     }
     if (
-      data.instanceName === 'Azure+On-Prem Azure Instance A' ||
-      data.instanceName === 'Azure+On-Prem On-Prem Instance B'
+      data.instanceName === 'Azure + On-Prem Azure Instance A' ||
+      data.instanceName === 'Azure + On-Prem On-Prem Instance B'
     ) {
       totals['Azure + On-Prem'] += data.totalCO2;
     }
     if (
-      data.instanceName === 'MultiCloud Instance A' ||
-      data.instanceName === 'MultiCloud Instance B'
+      data.instanceName === 'Multi Cloud Instance A' ||
+      data.instanceName === 'Multi Cloud Instance B'
     ) {
       totals['Multi Cloud'] += data.totalCO2;
     }
